@@ -6,7 +6,18 @@ const DEPLOY_ID = "93580b84922c";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-black text-white">
+    {/* FORCE_HIDE_HEADER_CSS */}
+<style>{`
+  body[data-pathname="/"] header,
+  body[data-pathname="/"] nav {
+    position: fixed !important;
+    top: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+  }
+`}</style>
+<main className="min-h-screen bg-black text-white">
       {/* BIG VISIBLE DEPLOY PROBE (cannot miss) */}
       <div className="fixed left-4 top-4 z-[9999] rounded-2xl border border-white/20 bg-black/80 px-4 py-3 text-left shadow-sm">
         <div className="text-xs uppercase tracking-[0.28em] text-white/80">LIVE_OK</div>
@@ -61,3 +72,4 @@ export default function Home() {
     </main>
   );
 }
+
