@@ -1,4 +1,6 @@
-﻿import type { Metadata } from "next";
+﻿export const dynamic = "force-dynamic";
+
+import type { Metadata } from "next";
 import Link from "next/link";
 import MarketingCTA from "@/src/components/marketing/MarketingCTA";
 import { USE_CASES } from "@/src/lib/marketing/catalog";
@@ -39,3 +41,4 @@ export default function UseCasesIndexPage() {
     </div>
   );
 }
+
