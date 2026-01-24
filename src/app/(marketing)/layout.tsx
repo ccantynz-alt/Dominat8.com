@@ -1,7 +1,7 @@
-﻿// src/app/(marketing)/layout.tsx
+﻿/* src/app/(marketing)/layout.tsx */
 import Link from "next/link";
 
-export default function MarketingLayout({ children }: { children: React.ReactNode }) {
+export default function MarketingLayout(props: { children: any }) {
   return (
     <>
       <header className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur">
@@ -36,25 +36,19 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-10">{children}</main>
+      <main className="mx-auto max-w-6xl px-4 py-10">{props.children}</main>
 
       <footer className="border-t bg-white">
         <div className="mx-auto max-w-6xl px-4 py-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="text-sm font-medium">Dominat8</div>
-            <div className="text-xs opacity-70">© {new Date().getFullYear()} Dominat8.com — Built on Vercel</div>
+            <div className="text-xs opacity-70">© 2026 Dominat8.com — Built on Vercel</div>
           </div>
 
           <div className="mt-4 flex flex-wrap gap-3 text-xs opacity-80">
-            <Link className="underline-offset-4 hover:underline" href="/pricing">
-              Pricing
-            </Link>
-            <Link className="underline-offset-4 hover:underline" href="/templates">
-              Templates
-            </Link>
-            <Link className="underline-offset-4 hover:underline" href="/use-cases">
-              Use cases
-            </Link>
+            <Link className="underline-offset-4 hover:underline" href="/pricing">Pricing</Link>
+            <Link className="underline-offset-4 hover:underline" href="/templates">Templates</Link>
+            <Link className="underline-offset-4 hover:underline" href="/use-cases">Use cases</Link>
           </div>
         </div>
       </footer>

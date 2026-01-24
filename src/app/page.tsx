@@ -1,4 +1,4 @@
-﻿// src/app/page.tsx
+﻿/* src/app/page.tsx */
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -8,8 +8,8 @@ export default function Home() {
       {/* PROBE OVERLAY (proves deploy + freshness) */}
       <div className="fixed left-4 top-4 z-[9999] rounded-2xl border border-white/20 bg-black/70 px-4 py-3 text-left shadow-sm">
         <div className="text-xs uppercase tracking-[0.28em] text-white/70">LIVE_OK</div>
-        <div className="mt-1 text-sm font-semibold text-white">DEPLOY_ID: {""}aebaf6cecc3f{""}</div>
-        <div className="text-sm font-semibold text-white">BUILD_STAMP: {""}BUILD_20260124_230735{""}</div>
+        <div className="mt-1 text-sm font-semibold text-white">DEPLOY_ID: {""}b126a38b7f08{""}</div>
+        <div className="text-sm font-semibold text-white">BUILD_STAMP: {""}BUILD_20260124_230948{""}</div>
         <div className="mt-1 text-xs text-white/50">
           If you don’t see this box, you’re not on the deployed route.
         </div>
