@@ -2,17 +2,27 @@
 
 export default function AudienceQualificationStrip() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-6">
-      <div className="rounded-3xl border border-white/[0.10] bg-white/[0.03] px-6 py-5">
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/80">
-          <span className="font-semibold text-white">Built for</span>
-          <span>Trades & contractors</span>
-          <span className="opacity-50">•</span>
-          <span>Rural & regional services</span>
-          <span className="opacity-50">•</span>
-          <span>Local operators</span>
-          <span className="opacity-50">•</span>
-          <span>Premium small businesses</span>
+    <section className="w-full border-y border-white/10 bg-black/30">
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs tracking-widest text-white/50">BUILT FOR</div>
+            <h2 className="mt-2 text-lg font-semibold text-white">
+              Rural &amp; professional businesses that need a premium web presence — fast.
+            </h2>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1 text-xs text-white/70">
+              Trades &amp; Services
+            </span>
+            <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1 text-xs text-white/70">
+              Rural Contractors
+            </span>
+            <span className="rounded-full border border-white/12 bg-white/5 px-3 py-1 text-xs text-white/70">
+              Local Professional Firms
+            </span>
+          </div>
         </div>
       </div>
     </section>

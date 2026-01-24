@@ -1,45 +1,56 @@
 ﻿import React from "react";
 
+type Step = {
+  n: string;
+  title: string;
+  body: string;
+};
+
+const STEPS: Step[] = [
+  {
+    n: "01",
+    title: "Pick your vibe",
+    body: "Start from a premium baseline. Your homepage already feels calm and flagship-grade.",
+  },
+  {
+    n: "02",
+    title: "Let the agents build",
+    body: "Sections, pages, and structure are generated to match what customers expect — with clean pacing.",
+  },
+  {
+    n: "03",
+    title: "Publish and refine",
+    body: "Get live fast. Then iterate with certainty — every patch shows a build stamp so you always know what shipped.",
+  },
+];
+
 export default function HowItWorksCalm() {
   return (
-    <section className="mx-auto w-full max-w-6xl px-6 py-14">
-      <div className="rounded-3xl border border-white/[0.10] bg-white/[0.03] p-8 md:p-10">
-        <div className="max-w-2xl">
-          <div className="text-xs uppercase tracking-[0.16em] text-white/55">
-            How it works
-          </div>
-          <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-4xl">
-            Clear, calm, and predictable.
+    <section className="w-full bg-black/20">
+      <div className="mx-auto max-w-6xl px-6 py-14">
+        <div className="max-w-3xl">
+          <div className="text-xs tracking-widest text-white/50">HOW IT WORKS</div>
+          <h2 className="mt-3 text-3xl font-semibold leading-tight text-white md:text-4xl">
+            Calm steps. No chaos. No guessing.
           </h2>
           <p className="mt-4 text-base leading-relaxed text-white/70">
-            No surprises. No “where did my changes go?” energy. Just a clean path
-            from brief to published site.
+            The point is momentum: ship a premium baseline, then improve it with confidence.
           </p>
         </div>
 
         <div className="mt-10 grid gap-4 md:grid-cols-3">
-          <div className="rounded-3xl border border-white/[0.10] bg-black/30 p-6">
-            <div className="text-sm font-semibold">1. Describe your business</div>
-            <p className="mt-2 text-sm leading-relaxed text-white/70">
-              Tell us what you do, who you serve, and what professional looks like
-              in your world.
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-white/[0.10] bg-black/30 p-6">
-            <div className="text-sm font-semibold">2. Review your site</div>
-            <p className="mt-2 text-sm leading-relaxed text-white/70">
-              See a complete homepage, pages, and structure — ready to refine,
-              not fix.
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-white/[0.10] bg-black/30 p-6">
-            <div className="text-sm font-semibold">3. Publish when ready</div>
-            <p className="mt-2 text-sm leading-relaxed text-white/70">
-              Confidently push live with clean routing and a premium result.
-            </p>
-          </div>
+          {STEPS.map((s) => (
+            <div
+              key={s.n}
+              className="rounded-2xl border border-white/10 bg-white/5 p-6"
+            >
+              <div className="text-xs font-semibold tracking-widest text-white/50">
+                STEP {s.n}
+              </div>
+              <div className="mt-3 text-lg font-semibold text-white">{s.title}</div>
+              <p className="mt-3 text-sm leading-relaxed text-white/70">{s.body}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
