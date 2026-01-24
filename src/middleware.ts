@@ -1,22 +1,16 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/__probe_pages__(.*)",
-]);
-
-export default clerkMiddleware((auth, req) => {
-  // CRITICAL: never run auth middleware on /api routes (agents live here)
-  if (req.nextUrl.pathname.startsWith("/api")) return;
-
-  if (isPublicRoute(req)) return;
-
-  auth().protect();
-});
+export function middleware(req: NextRequest) {
+  // Do NOT rewrite/redirect routes here. Just set anti-cache headers.
+  const res = NextResponse.next();
+  res.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+  res.headers.set("Pragma", "no-cache");
+  res.headers.set("Expires", "0");
+  res.headers.set("Surrogate-Control", "no-store");
+  return res;
+}
 
 export const config = {
-  // CRITICAL: exclude /api from matcher completely
-  matcher: ["/((?!api|_next|.*\\..*).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
