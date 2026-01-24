@@ -1,3 +1,4 @@
+export const fetchCache = "force-no-store";
 import "./globals.css";
 import type { Metadata } from "next";
 
@@ -6,13 +7,13 @@ const __BUILD_SHA_SHORT = __BUILD_SHA ? String(__BUILD_SHA).slice(0, 8) : "local
 const __VERCEL_ENV = process.env.VERCEL_ENV || "local";import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Dominat8 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â AI Website Builder",
+  title: "Dominat8 ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â AI Website Builder",
   description:
     "Generate and publish a complete website in minutes. Built for speed, clarity, and SEO-ready fundamentals.",
   metadataBase: new URL("https://www.dominat8.com"),
   alternates: { canonical: "/" },
   openGraph: {
-    title: "Dominat8 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â AI Website Builder",
+    title: "Dominat8 ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â AI Website Builder",
     description: "Generate and publish a complete website in minutes.",
     url: "https://www.dominat8.com/",
     siteName: "Dominat8",
@@ -68,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="mx-auto max-w-6xl px-4 py-8">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="text-sm font-medium">Dominat8</div>
-              <div className="text-xs opacity-70">ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÂ© {new Date().getFullYear()} Dominat8.com ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Built on Vercel</div>
+              <div className="text-xs opacity-70">ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ã‚Â© {new Date().getFullYear()} Dominat8.com ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â Built on Vercel</div>
             </div>
             <div className="mt-4 flex flex-wrap gap-3 text-xs opacity-80">
               <Link className="underline-offset-4 hover:underline" href="/pricing">
@@ -83,10 +84,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
                       <div className="mt-4 flex flex-wrap items-center gap-3 text-[11px] opacity-80">
               <span data-x-dominat8-build-badge>
-                Build: <span className="font-mono">{__BUILD_SHA_SHORT}</span> ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Env: <span className="font-mono">{__VERCEL_ENV}</span>
+                Build: <span className="font-mono">{__BUILD_SHA_SHORT}</span> ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Env: <span className="font-mono">{__VERCEL_ENV}</span>
               </span>
               <a className="underline-offset-4 hover:underline" href={"/api/__site_status__?ts=" + Date.now()}>
-                Live status ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢
+                Live status ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢
               </a>
             </div>
 </div></footer>
