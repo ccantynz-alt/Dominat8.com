@@ -2,6 +2,7 @@ import { kvGet, kvSet } from "./kv";
 import { Keys } from "./keys";
 import { generateContentForCampaign } from "./generate";
 import { getMarketingMachineConfig } from "./config";
+import { checkContentCompliance } from "./compliance";
 import {
   MarketingCampaign,
   MarketingContentItem,
@@ -163,12 +164,14 @@ export async function scheduleContent(id: string, scheduledFor: string): Promise
 export async function listSchedules(): Promise<MarketingScheduleEntry[]> {
   const ids = await getIndex(Keys.scheduleIndex());
   const out: MarketingScheduleEntry[] = [];
-  for (const id of ids.slice(0, 300)) {
+  for (const id of ids.slice(0, 500)) {
     const raw = await kvGet(Keys.schedule(id));
     if (!raw) continue;
     const x = safeJsonParse<MarketingScheduleEntry>(raw, null as any);
     if (x) out.push(x);
   }
+  // default: sort by scheduledFor asc
+  out.sort((a, b) => (a.scheduledFor || "").localeCompare(b.scheduledFor || ""));
   return out;
 }
 
@@ -216,7 +219,7 @@ export async function runScheduler(nowIsoString?: string): Promise<{ ranAt: stri
       const content = await getContent(s.contentId);
       if (!content) throw new Error("Content missing");
 
-      // Always dry-run publish in V1 (publisher enforces)
+      // Always dry-run publish in V1/V1.2 (publisher enforces)
       const log = await dryRunPublish(content);
       await savePostLog(log);
       logs.push(log);
@@ -238,4 +241,128 @@ export async function runScheduler(nowIsoString?: string): Promise<{ ranAt: stri
   }
 
   return { ranAt, attempted, posted, failed, logs };
+}
+
+export async function listSchedulesWithContent(): Promise<Array<{ schedule: MarketingScheduleEntry; content: MarketingContentItem | null; campaign: MarketingCampaign | null }>> {
+  const schedules = await listSchedules();
+  const out: Array<{ schedule: MarketingScheduleEntry; content: MarketingContentItem | null; campaign: MarketingCampaign | null }> = [];
+  for (const s of schedules) {
+    const content = await getContent(s.contentId);
+    const campaign = content ? await getCampaign(content.campaignId) : null;
+    out.push({ schedule: s, content, campaign });
+  }
+  // sort scheduled first, then by scheduledFor
+  out.sort((a, b) => {
+    const as = a.schedule.status === "scheduled" ? 0 : a.schedule.status === "failed" ? 1 : 2;
+    const bs = b.schedule.status === "scheduled" ? 0 : b.schedule.status === "failed" ? 1 : 2;
+    if (as !== bs) return as - bs;
+    return (a.schedule.scheduledFor || "").localeCompare(b.schedule.scheduledFor || "");
+  });
+  return out;
+}
+
+export async function regenerateContent(contentId: string, mode: "hooks" | "all"): Promise<{ ok: boolean; content?: MarketingContentItem; error?: string; complianceWarnings?: string[] }> {
+  const item = await getContent(contentId);
+  if (!item) return { ok: false, error: "Not found" };
+
+  const camp = await getCampaign(item.campaignId);
+  if (!camp) return { ok: false, error: "Campaign missing" };
+
+  const generated = generateContentForCampaign(camp, item.platform);
+
+  const patch: Partial<MarketingContentItem> = {};
+  if (mode === "hooks") {
+    patch.hooks = generated.hooks;
+    patch.status = "draft";
+    patch.error = undefined;
+  } else {
+    patch.hooks = generated.hooks;
+    patch.script = generated.script;
+    patch.caption = generated.caption;
+    patch.hashtags = generated.hashtags;
+    patch.videoPrompt = generated.videoPrompt;
+    patch.status = "draft";
+    patch.error = undefined;
+    patch.scheduledFor = undefined;
+    patch.platformPostId = undefined;
+  }
+
+  const updated = await updateContent(contentId, patch);
+  const compliance = updated ? checkContentCompliance(updated) : { ok: true, warnings: [] };
+  return { ok: true, content: updated || undefined, complianceWarnings: compliance.warnings };
+}
+
+export async function bulkAction(input: {
+  action: "approve" | "reject" | "schedule";
+  ids: string[];
+  reason?: string;
+  scheduledForBase?: string;
+  spacingMins?: number;
+  jitterMaxMins?: number;
+  overrideCompliance?: boolean;
+}): Promise<{ ok: boolean; updatedCount: number; errors: Array<{ id: string; error: string }>; complianceBlocked: string[] }> {
+  const cfg = getMarketingMachineConfig();
+  const ids = Array.isArray(input.ids) ? input.ids : [];
+  const errors: Array<{ id: string; error: string }> = [];
+  const complianceBlocked: string[] = [];
+  let updatedCount = 0;
+
+  const spacing = Math.max(1, Math.min(180, Number(input.spacingMins ?? 10)));
+  const jitterMax = Math.max(0, Math.min(30, Number(input.jitterMaxMins ?? 6)));
+
+  function jitter(): number {
+    if (jitterMax <= 0) return 0;
+    return Math.floor(Math.random() * (jitterMax + 1));
+  }
+
+  for (let i = 0; i < ids.length; i++) {
+    const id = String(ids[i] || "");
+    if (!id) continue;
+    try {
+      if (input.action === "approve") {
+        const c = await getContent(id);
+        if (!c) throw new Error("Not found");
+
+        const compliance = checkContentCompliance(c);
+        if (!compliance.ok && !input.overrideCompliance) {
+          complianceBlocked.push(id);
+          continue;
+        }
+
+        const r = await approveContent(id);
+        if (!r) throw new Error("Not found");
+        updatedCount++;
+      }
+
+      if (input.action === "reject") {
+        const r = await rejectContent(id, input.reason || "Rejected");
+        if (!r) throw new Error("Not found");
+        updatedCount++;
+      }
+
+      if (input.action === "schedule") {
+        const base = String(input.scheduledForBase || "");
+        if (!base) throw new Error("scheduledForBase is required");
+        const baseMs = Date.parse(base);
+        if (Number.isNaN(baseMs)) throw new Error("scheduledForBase must be ISO");
+
+        const scheduledFor = new Date(baseMs + (i * spacing + jitter()) * 60 * 1000).toISOString();
+
+        const c = await getContent(id);
+        if (!c) throw new Error("Not found");
+
+        if (cfg.approvalRequired && c.status !== "approved") {
+          throw new Error("Approval required before scheduling");
+        }
+
+        const r = await scheduleContent(id, scheduledFor);
+        if (!r.content || !r.schedule) throw new Error("Schedule failed");
+        updatedCount++;
+      }
+    } catch (e: any) {
+      errors.push({ id, error: e?.message ? String(e.message) : "Bulk error" });
+    }
+  }
+
+  return { ok: true, updatedCount, errors, complianceBlocked };
 }
