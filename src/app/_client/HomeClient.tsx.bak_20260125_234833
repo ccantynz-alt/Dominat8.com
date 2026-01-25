@@ -20,12 +20,11 @@ function usePrefersReducedMotion() {
   const [reduced, setReduced] = React.useState(false);
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-    // Guard: some older browsers
-    const mq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
-    const onChange = () => setReduced(!!mq?.matches);
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(!!mq.matches);
     onChange();
-    mq?.addEventListener?.("change", onChange);
-    return () => mq?.removeEventListener?.("change", onChange);
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
   }, []);
   return reduced;
 }
@@ -59,12 +58,10 @@ function Chip({ text }: { text: string }) {
 
 function GlassCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div
-      className={cx(
-        "relative overflow-hidden rounded-3xl border border-white/12 bg-white/[0.045] shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_30px_90px_rgba(0,0,0,0.68)] backdrop-blur",
-        className
-      )}
-    >
+    <div className={cx(
+      "relative overflow-hidden rounded-3xl border border-white/12 bg-white/[0.045] shadow-[0_0_0_1px_rgba(255,255,255,0.04),0_30px_90px_rgba(0,0,0,0.65)] backdrop-blur",
+      className
+    )}>
       <div className="pointer-events-none absolute inset-0 opacity-[0.55] [mask-image:radial-gradient(ellipse_at_top,black,transparent_65%)] bg-gradient-to-b from-white/12 via-white/0 to-white/0" />
       <div className="relative">{children}</div>
     </div>
@@ -80,28 +77,26 @@ const PRESETS = [
 ];
 
 const THEMES = [
-  { name: "Nebula Purple", a: "rgba(168,85,247,0.78)", b: "rgba(59,130,246,0.60)", c: "rgba(34,211,238,0.25)" },
-  { name: "Hyper Blue", a: "rgba(59,130,246,0.78)", b: "rgba(34,211,238,0.60)", c: "rgba(255,255,255,0.18)" },
-  { name: "Fuchsia Pop", a: "rgba(217,70,239,0.78)", b: "rgba(168,85,247,0.60)", c: "rgba(59,130,246,0.25)" },
+  { name: "Nebula Purple", a: "rgba(168,85,247,0.70)", b: "rgba(59,130,246,0.55)", c: "rgba(34,211,238,0.22)" },
+  { name: "Hyper Blue", a: "rgba(59,130,246,0.70)", b: "rgba(34,211,238,0.55)", c: "rgba(255,255,255,0.16)" },
+  { name: "Fuchsia Pop", a: "rgba(217,70,239,0.70)", b: "rgba(168,85,247,0.55)", c: "rgba(59,130,246,0.22)" },
 ];
 
 function Step({ on, title, desc }: { on: boolean; title: string; desc: string }) {
   return (
-    <div
-      className={cx(
-        "rounded-2xl border p-4 transition-all",
-        on ? "border-fuchsia-300/28 bg-fuchsia-300/12 shadow-[0_0_0_1px_rgba(217,70,239,0.10),0_18px_60px_rgba(168,85,247,0.16)]"
-           : "border-white/10 bg-black/25"
-      )}
-    >
+    <div className={cx(
+      "rounded-2xl border p-4 transition-all",
+      on ? "border-fuchsia-300/25 bg-fuchsia-300/10" : "border-white/10 bg-black/25"
+    )}>
       <div className="text-sm font-bold text-white/92">{title}</div>
       <div className="mt-1 text-xs text-white/70">{desc}</div>
     </div>
   );
 }
 
-function PreviewShell({ variant, hot }: { variant: number; hot: boolean }) {
+function PreviewShell({ variant }: { variant: number }) {
   const v = variant % 3;
+
   const top = [
     { h: "AI Tool Landing", s: "Conversion hero + pricing + FAQ", tag: "SaaS" },
     { h: "Local Service Site", s: "Trust, reviews, booking CTA", tag: "Local" },
@@ -112,21 +107,12 @@ function PreviewShell({ variant, hot }: { variant: number; hot: boolean }) {
     v === 0
       ? ["Hero + glow", "Benefits", "Pricing", "FAQ", "Closing CTA"]
       : v === 1
-      ? ["Hero + booking", "Services", "Reviews", "Areas", "Call now"]
+      ? ["Hero + phone", "Services", "Reviews", "Areas", "Booking CTA"]
       : ["Hero + reel", "Case studies", "Proof", "Process", "Contact CTA"];
 
   return (
-    <div className={cx(
-      "relative overflow-hidden rounded-3xl border border-white/12 bg-black/35 transition-transform",
-      hot ? "scale-[1.012]" : "scale-100"
-    )}>
-      <div className={cx(
-        "absolute inset-0 opacity-[0.34]",
-        hot ? "animate-d8-flicker" : ""
-      )} style={{
-        background:
-          "radial-gradient(circle_at_20%_25%,rgba(255,255,255,0.12),transparent_55%),radial-gradient(circle_at_85%_60%,rgba(255,255,255,0.07),transparent_60%)"
-      }} />
+    <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-black/35">
+      <div className="absolute inset-0 opacity-[0.30] bg-[radial-gradient(circle_at_20%_25%,rgba(255,255,255,0.10),transparent_55%),radial-gradient(circle_at_85%_60%,rgba(255,255,255,0.06),transparent_60%)]" />
       <div className="relative p-4">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -140,10 +126,7 @@ function PreviewShell({ variant, hot }: { variant: number; hot: boolean }) {
         </div>
 
         <div className="mt-4 grid gap-3">
-          <div className={cx(
-            "h-24 rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.04))]",
-            hot ? "shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_18px_70px_rgba(168,85,247,0.14)]" : ""
-          )} />
+          <div className="h-24 rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.14),rgba(255,255,255,0.04))]" />
           <div className="grid grid-cols-2 gap-3">
             <div className="h-16 rounded-2xl border border-white/10 bg-white/[0.06]" />
             <div className="h-16 rounded-2xl border border-white/10 bg-white/[0.06]" />
@@ -182,14 +165,12 @@ export default function HomeClient() {
   const mouseRef = React.useRef<{ x: number; y: number }>({ x: -9999, y: -9999 });
   const rafRef = React.useRef<number | null>(null);
 
-  // Demo
+  // Slap Mode demo
   const [prompt, setPrompt] = React.useState<string>(PRESETS[0]);
   const [demo, setDemo] = React.useState<DemoState>("idle");
   const [step, setStep] = React.useState<number>(0);
   const [variant, setVariant] = React.useState<number>(0);
   const [theme, setTheme] = React.useState<number>(0);
-  const [impact, setImpact] = React.useState<boolean>(true);   // first load impact
-  const [hot, setHot] = React.useState<boolean>(false);        // preview highlight pulse
 
   React.useEffect(() => {
     let alive = true;
@@ -232,37 +213,21 @@ export default function HomeClient() {
     if (demo === "running") return;
     setDemo("running");
     setStep(0);
-    setHot(true);
 
+    // rotate theme + preview variant for "wow"
     setTheme((t) => (t + 1) % THEMES.length);
     setVariant((v) => v + 1);
 
-    const times = [380, 780, 1180, 1580];
+    // step animation
+    const times = [450, 900, 1350, 1800];
     times.forEach((ms, i) => {
       window.setTimeout(() => setStep(i + 1), ms);
     });
-    window.setTimeout(() => setDemo("done"), 1820);
-    window.setTimeout(() => setHot(false), 1300);
+    window.setTimeout(() => setDemo("done"), 2100);
+
+    // auto-reset to idle after a moment (keeps it interactive)
     window.setTimeout(() => setDemo("idle"), 5200);
   }
-
-  // Auto-fire once per browser (first wow hit)
-  React.useEffect(() => {
-    if (reducedMotion) { setImpact(false); return; }
-    try {
-      const key = "dominat8_home_auto_demo_v7";
-      const already = window.sessionStorage.getItem(key);
-      if (!already) {
-        window.sessionStorage.setItem(key, "1");
-        // brief delay so layout paints first
-        window.setTimeout(() => runDemo(), 420);
-      }
-    } catch {
-      // ignore
-    }
-    window.setTimeout(() => setImpact(false), 1400);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reducedMotion]);
 
   const nowMs = Date.now();
   const uptime = nowMs - clientStartMs;
@@ -270,12 +235,13 @@ export default function HomeClient() {
   const skewMs = serverNowMs ? Math.round(nowMs - serverNowMs) : null;
 
   const t = THEMES[theme];
+
   const mx = reducedMotion ? -9999 : mouse.x;
   const my = reducedMotion ? -9999 : mouse.y;
 
   return (
     <main
-      className={cx("min-h-screen bg-black text-white", impact && !reducedMotion ? "animate-d8-kick" : "")}
+      className="min-h-screen bg-black text-white"
       style={
         {
           ["--mx" as any]: `${mx}px`,
@@ -286,95 +252,67 @@ export default function HomeClient() {
         } as React.CSSProperties
       }
     >
-      {/* Background */}
+      {/* Slap Mode Background */}
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        {/* Base */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(255,255,255,0.06),transparent_55%),radial-gradient(circle_at_80%_30%,rgba(255,255,255,0.04),transparent_60%)]" />
 
+        {/* Aurora */}
         <div className={cx(
-          "absolute inset-0 opacity-[0.32] bg-[radial-gradient(circle_at_18%_20%,var(--a),transparent_55%),radial-gradient(circle_at_78%_26%,var(--b),transparent_58%),radial-gradient(circle_at_55%_82%,var(--c),transparent_65%)]",
+          "absolute inset-0 opacity-[0.30] bg-[radial-gradient(circle_at_18%_20%,var(--a),transparent_55%),radial-gradient(circle_at_78%_26%,var(--b),transparent_58%),radial-gradient(circle_at_55%_82%,var(--c),transparent_65%)]",
           reducedMotion ? "" : "animate-d8-aurora"
         )} />
 
+        {/* Cursor spotlight */}
         <div
-          className={cx("absolute inset-0", reducedMotion ? "opacity-0" : "opacity-[0.75]")}
+          className={cx("absolute inset-0", reducedMotion ? "opacity-0" : "opacity-[0.70]")}
           style={{
             background:
-              "radial-gradient(820px circle at var(--mx) var(--my), rgba(217,70,239,0.20), transparent 46%), radial-gradient(1120px circle at var(--mx) var(--my), rgba(59,130,246,0.14), transparent 56%)",
+              "radial-gradient(720px circle at var(--mx) var(--my), rgba(168,85,247,0.22), transparent 45%), radial-gradient(980px circle at var(--mx) var(--my), rgba(59,130,246,0.16), transparent 55%)",
           }}
         />
 
-        <div className="absolute inset-0 opacity-[0.11] [background-image:linear-gradient(to_right,rgba(255,255,255,0.09)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:72px_72px]" />
+        {/* Grid */}
+        <div className="absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.09)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:72px_72px]" />
 
+        {/* Grain */}
         <div className="absolute inset-0 opacity-[0.08] [background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22 x=%220%22 y=%220%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%220.35%22/></svg>')]" />
 
-        {/* Impact overlays */}
-        {reducedMotion ? null : (
-          <>
-            <div className={cx("absolute inset-0 opacity-0", impact ? "animate-d8-glare" : "")}
-                 style={{ background: "radial-gradient(700px circle at 50% 18%, rgba(255,255,255,0.18), transparent 60%)" }} />
-            <div className={cx("absolute left-1/2 top-[18%] h-[980px] w-[980px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/12 opacity-0", impact ? "animate-d8-shock" : "")} />
-            <div className={cx("absolute left-1/2 top-[18%] h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/14 opacity-0", impact ? "animate-d8-shock2" : "")} />
-          </>
-        )}
+        {/* Shockwave entrance */}
+        <div className={cx("absolute inset-0", reducedMotion ? "hidden" : "")}>
+          <div className="absolute left-1/2 top-[18%] h-[900px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/10 opacity-0 animate-d8-shock" />
+          <div className="absolute left-1/2 top-[18%] h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/12 opacity-0 animate-d8-shock2" />
+        </div>
       </div>
 
       {/* Keyframes */}
       <style jsx global>{`
         @keyframes d8Aurora {
-          0% { transform: translate3d(0px, 0px, 0px) scale(1); filter: hue-rotate(0deg) saturate(1.16); }
-          50% { transform: translate3d(-22px, 12px, 0px) scale(1.03); filter: hue-rotate(-10deg) saturate(1.20); }
-          100% { transform: translate3d(0px, 0px, 0px) scale(1); filter: hue-rotate(0deg) saturate(1.16); }
+          0% { transform: translate3d(0px, 0px, 0px) scale(1); filter: hue-rotate(0deg) saturate(1.12); }
+          50% { transform: translate3d(-22px, 12px, 0px) scale(1.03); filter: hue-rotate(-10deg) saturate(1.16); }
+          100% { transform: translate3d(0px, 0px, 0px) scale(1); filter: hue-rotate(0deg) saturate(1.12); }
         }
-        .animate-d8-aurora { animation: d8Aurora 22s ease-in-out infinite; will-change: transform, filter; }
+        .animate-d8-aurora { animation: d8Aurora 24s ease-in-out infinite; will-change: transform, filter; }
 
         @keyframes d8Shock {
-          0% { transform: translate(-50%, -50%) scale(0.52); opacity: 0; }
-          20% { opacity: 0.40; }
-          100% { transform: translate(-50%, -50%) scale(1.28); opacity: 0; }
+          0% { transform: translate(-50%, -50%) scale(0.55); opacity: 0; }
+          20% { opacity: 0.35; }
+          100% { transform: translate(-50%, -50%) scale(1.25); opacity: 0; }
         }
         @keyframes d8Shock2 {
-          0% { transform: translate(-50%, -50%) scale(0.74); opacity: 0; }
-          25% { opacity: 0.32; }
-          100% { transform: translate(-50%, -50%) scale(1.45); opacity: 0; }
+          0% { transform: translate(-50%, -50%) scale(0.75); opacity: 0; }
+          25% { opacity: 0.28; }
+          100% { transform: translate(-50%, -50%) scale(1.40); opacity: 0; }
         }
-        .animate-d8-shock { animation: d8Shock 1.15s ease-out 1; }
-        .animate-d8-shock2 { animation: d8Shock2 1.35s ease-out 1; }
-
-        @keyframes d8Glare {
-          0% { opacity: 0; }
-          18% { opacity: 1; }
-          100% { opacity: 0; }
-        }
-        .animate-d8-glare { animation: d8Glare 1.05s ease-out 1; }
-
-        @keyframes d8Kick {
-          0% { transform: translate3d(0, 0, 0) scale(0.995); }
-          18% { transform: translate3d(0, -2px, 0) scale(1.006); }
-          28% { transform: translate3d(0, 1px, 0) scale(1.002); }
-          100% { transform: translate3d(0, 0, 0) scale(1); }
-        }
-        .animate-d8-kick { animation: d8Kick 520ms ease-out 1; }
-
-        @keyframes d8Flicker {
-          0% { opacity: 0.22; }
-          30% { opacity: 0.52; }
-          100% { opacity: 0.28; }
-        }
-        .animate-d8-flicker { animation: d8Flicker 1.0s ease-out 1; }
+        .animate-d8-shock { animation: d8Shock 1.25s ease-out 1; }
+        .animate-d8-shock2 { animation: d8Shock2 1.55s ease-out 1; }
 
         .d8-gradient-text {
-          background: linear-gradient(90deg, rgba(255,255,255,0.96), rgba(217,70,239,0.96), rgba(168,85,247,0.96), rgba(59,130,246,0.90), rgba(34,211,238,0.84));
+          background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(217,70,239,0.95), rgba(168,85,247,0.95), rgba(59,130,246,0.90), rgba(34,211,238,0.84));
           -webkit-background-clip: text;
           background-clip: text;
           color: transparent;
         }
-
-        @keyframes snapIn {
-          0% { transform: translateY(12px) scale(0.98); opacity: 0; filter: blur(6px); }
-          70% { opacity: 1; }
-          100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
-        }
-        .d8-snap { animation: snapIn 520ms cubic-bezier(.2,.8,.2,1) 1; }
 
         @keyframes caret {
           0%, 49% { opacity: 1; }
@@ -384,7 +322,7 @@ export default function HomeClient() {
       `}</style>
 
       <div className="mx-auto max-w-6xl px-6">
-        {/* Trust strip */}
+        {/* Trust mode strip (compact) */}
         <div className="pt-6">
           <GlassCard className="p-5">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -398,9 +336,6 @@ export default function HomeClient() {
                   <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/30 px-3 py-1 text-xs text-white/70">
                     <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-300/80" />
                     no-store probe
-                  </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-black/30 px-3 py-1 text-xs text-white/70">
-                    <span className="font-mono text-white/70">V7</span> timber slap
                   </div>
                 </div>
                 <div className="mt-2 text-sm text-white/80">
@@ -460,23 +395,24 @@ export default function HomeClient() {
           </GlassCard>
         </div>
 
-        {/* HERO */}
+        {/* SLAP MODE HERO */}
         <section className="relative pt-10 pb-14">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-            <div className="d8-snap">
+            {/* Left: narrative */}
+            <div>
               <div className="flex flex-wrap gap-2">
-                <Chip text="Auto demo on first load" />
-                <Chip text="Impact intro" />
-                <Chip text="Feels alive" />
+                <Chip text="Interactive demo" />
+                <Chip text="Conversion-first layout" />
+                <Chip text="Trust Mode proof" />
               </div>
 
               <h1 className="mt-7 max-w-xl text-balance text-4xl font-extrabold leading-[1.02] tracking-tight md:text-6xl">
-                Not a template builder.
-                <span className="block d8-gradient-text">A launch machine.</span>
+                This isn’t a normal website builder.
+                <span className="block d8-gradient-text">It generates a launch-ready site.</span>
               </h1>
 
               <p className="mt-5 max-w-xl text-pretty text-lg text-white/75 leading-relaxed">
-                The page proves itself instantly: it runs a mini generation demo on first load — then you can drive it.
+                Type a prompt. Click generate. Watch it assemble a real marketing homepage structure — immediately.
               </p>
 
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
@@ -484,21 +420,42 @@ export default function HomeClient() {
                   className="group relative overflow-hidden rounded-2xl bg-white px-6 py-3 text-sm font-extrabold text-black shadow-[0_18px_90px_rgba(168,85,247,0.18),0_18px_70px_rgba(59,130,246,0.12)] hover:bg-white/90"
                   onClick={runDemo}
                 >
-                  <span className="relative z-10">{demo === "running" ? "Generating…" : "Hit me again"}</span>
+                  <span className="relative z-10">
+                    {demo === "running" ? "Generating…" : "Generate a site right now"}
+                  </span>
                   <span className="relative z-10 ml-2 text-black/60 transition-transform group-hover:translate-x-0.5">→</span>
                 </button>
 
-                <a className="rounded-2xl border border-white/18 bg-white/[0.06] px-6 py-3 text-center text-sm font-bold text-white hover:bg-white/[0.10]" href="/templates">
+                <a
+                  className="rounded-2xl border border-white/18 bg-white/[0.06] px-6 py-3 text-center text-sm font-bold text-white hover:bg-white/[0.10]"
+                  href="/templates"
+                >
                   Browse templates
                 </a>
               </div>
+
+              <div className="mt-8 grid gap-3 rounded-3xl border border-white/10 bg-white/[0.04] p-5 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="text-xs uppercase tracking-[0.28em] text-white/60">Outcome</div>
+                  <div className="mt-2 text-sm font-semibold text-white/90">Publish-ready structure</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="text-xs uppercase tracking-[0.28em] text-white/60">Speed</div>
+                  <div className="mt-2 text-sm font-semibold text-white/90">Minutes, not weeks</div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                  <div className="text-xs uppercase tracking-[0.28em] text-white/60">Proof</div>
+                  <div className="mt-2 text-sm font-semibold text-white/90">Know what’s live</div>
+                </div>
+              </div>
             </div>
 
+            {/* Right: mini product demo */}
             <div>
               <GlassCard className="p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-xs uppercase tracking-[0.28em] text-white/55">Timber Slap</div>
+                    <div className="text-xs uppercase tracking-[0.28em] text-white/55">Slap Mode</div>
                     <div className="mt-1 text-sm font-extrabold text-white/90">Live generator preview</div>
                   </div>
                   <div className="rounded-2xl border border-white/12 bg-white/[0.06] px-3 py-2 text-xs text-white/75">
@@ -516,14 +473,31 @@ export default function HomeClient() {
                       placeholder="Describe the site you want…"
                     />
                     <div className="flex flex-wrap gap-2">
-                      <button className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/[0.10]" onClick={() => setPrompt(PRESETS[0])}>Preset 1</button>
-                      <button className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/[0.10]" onClick={() => setPrompt(PRESETS[1])}>Preset 2</button>
-                      <button className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/[0.10]" onClick={() => setPrompt(PRESETS[2])}>Preset 3</button>
+                      <button
+                        className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/[0.10]"
+                        onClick={() => setPrompt(PRESETS[0])}
+                      >
+                        Preset 1
+                      </button>
+                      <button
+                        className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/[0.10]"
+                        onClick={() => setPrompt(PRESETS[1])}
+                      >
+                        Preset 2
+                      </button>
+                      <button
+                        className="rounded-2xl border border-white/12 bg-white/[0.06] px-4 py-2 text-sm font-semibold text-white/90 hover:bg-white/[0.10]"
+                        onClick={() => setPrompt(PRESETS[2])}
+                      >
+                        Preset 3
+                      </button>
 
                       <button
                         className={cx(
                           "ml-auto rounded-2xl px-4 py-2 text-sm font-extrabold",
-                          demo === "running" ? "bg-white/70 text-black" : "bg-white text-black hover:bg-white/90"
+                          demo === "running"
+                            ? "bg-white/70 text-black"
+                            : "bg-white text-black hover:bg-white/90"
                         )}
                         onClick={runDemo}
                       >
@@ -537,29 +511,54 @@ export default function HomeClient() {
                   <div className="space-y-3">
                     <Step on={step >= 1} title="Plan layout" desc="Hero, proof, steps, pricing, FAQ" />
                     <Step on={step >= 2} title="Write conversion copy" desc="Outcome-driven headline + CTAs" />
-                    <Step on={step >= 3} title="Assemble sections" desc="Rhythm, spacing, hierarchy" />
+                    <Step on={step >= 3} title="Assemble sections" desc="Marketing rhythm, spacing, hierarchy" />
                     <Step on={step >= 4} title="Ready to publish" desc="Deploy-friendly structure + proof" />
                   </div>
                   <div className="relative">
                     <div className="mb-3 text-xs text-white/60">
-                      Preview{" "}
-                      {demo === "running" ? (
-                        <span className="font-mono">
-                          generating<span className="d8-caret">|</span>
-                        </span>
-                      ) : (
-                        <span className="font-mono">ready</span>
-                      )}
+                      Preview {demo === "running" ? <span className="font-mono">generating<span className="d8-caret">|</span></span> : <span className="font-mono">ready</span>}
                     </div>
-                    <PreviewShell variant={variant} hot={hot && !reducedMotion} />
+                    <PreviewShell variant={variant} />
                   </div>
                 </div>
               </GlassCard>
 
               <div className="mt-4 text-xs text-white/55">
-                First load runs the demo once automatically. Refresh and it won’t spam (sessionStorage).
+                Tip: click <span className="text-white/75 font-mono">Generate</span> a few times — it rotates themes + preview layouts for instant “wow”.
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Simple lower content (kept minimal; hero is the slap) */}
+        <section className="pb-16">
+          <div className="grid gap-6 md:grid-cols-3">
+            <GlassCard className="p-6">
+              <div className="text-xs uppercase tracking-[0.28em] text-white/60">Why it converts</div>
+              <div className="mt-3 text-lg font-extrabold">Built for momentum.</div>
+              <div className="mt-2 text-sm text-white/72 leading-relaxed">
+                No setup soup. No second-guessing deploys. Just generate → iterate → publish with proof.
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="text-xs uppercase tracking-[0.28em] text-white/60">What you get</div>
+              <div className="mt-3 text-lg font-extrabold">A real marketing page.</div>
+              <div className="mt-2 text-sm text-white/72 leading-relaxed">
+                Hero, proof, steps, pricing, FAQ, closing CTA — structured like high-performing SaaS.
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="text-xs uppercase tracking-[0.28em] text-white/60">Next step</div>
+              <div className="mt-3 text-lg font-extrabold">Try templates.</div>
+              <div className="mt-2 text-sm text-white/72 leading-relaxed">
+                Start with a template, generate your first version, then publish when it feels right.
+              </div>
+              <a className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-extrabold text-black hover:bg-white/90" href="/templates">
+                Generate my site
+              </a>
+            </GlassCard>
           </div>
 
           <footer className="mt-12 border-t border-white/10 py-8 text-sm text-white/60">
