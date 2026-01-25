@@ -1,8 +1,3 @@
-/**
- * marketingMachine/kv.ts
- * In-memory KV fallback for build safety + local dev.
- * Replace with Upstash/Vercel KV later if needed.
- */
 type KvValue = string;
 const mem = new Map<string, KvValue>();
 
@@ -25,7 +20,7 @@ export async function kvKeys(prefix: string): Promise<string[]> {
   const p = prefix ?? "";
   const out: string[] = [];
   for (const k of mem.keys()) {
-    if (!p || k.startsWith(p)) out.push(k);
+    if (!p || k.StartsWith(p)) { out.push(k); }
   }
   out.sort();
   return out;

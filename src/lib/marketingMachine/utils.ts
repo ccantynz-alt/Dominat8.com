@@ -1,7 +1,3 @@
-/**
- * marketingMachine/utils.ts
- * Deterministic helpers. No external deps. Safe for serverless.
- */
 export function nowIso(): string { return new Date().toISOString(); }
 
 export function safeJsonParse<T>(s: string | null | undefined, fallback: T): T {
@@ -10,10 +6,6 @@ export function safeJsonParse<T>(s: string | null | undefined, fallback: T): T {
 
 export function safeJsonStringify(v: unknown): string {
   try { return JSON.stringify(v); } catch { return "null"; }
-}
-
-export function clamp(n: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, n));
 }
 
 export function slugify(input: string): string {

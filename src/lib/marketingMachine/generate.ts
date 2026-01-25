@@ -1,8 +1,3 @@
-/**
- * marketingMachine/generate.ts
- * Stub-safe generator that returns deterministic content.
- * Replace with your real generator later.
- */
 import { nowIso, slugify, toTitle } from "./utils";
 
 export type MarketingPageSpec = {

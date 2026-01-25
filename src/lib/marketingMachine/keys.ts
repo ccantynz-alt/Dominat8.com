@@ -1,7 +1,3 @@
-/**
- * marketingMachine/keys.ts
- * Central key scheme for marketing machine artifacts.
- */
 export const MM_PREFIX = "marketingMachine:";
 
 export function keyPageSpec(slug: string): string {
