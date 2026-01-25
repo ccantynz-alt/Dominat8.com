@@ -1,34 +1,33 @@
-export const MM_PREFIX = "marketingMachine:";
-
-export function keyPageSpec(slug: string): string {
-  return `${MM_PREFIX}page:${slug}:spec`;
-}
-
-export function keyPageHtml(slug: string): string {
-  return `${MM_PREFIX}page:${slug}:html`;
-}
-
-export function keyPageMeta(slug: string): string {
-  return `${MM_PREFIX}page:${slug}:meta`;
-}
-
-export function keyBulkRun(runId: string): string {
-  return `${MM_PREFIX}bulk:${runId}`;
-}
 /**
- * Compatibility export: store.ts expects Keys.
- * Keep these deterministic; no external deps.
+ * marketingMachine/keys.ts
+ * Build-safe KV key helpers.
+ * Keep simple: no nested template-string tricks.
  */
+
+function k(name: string, ...parts: Array<string | number>) {
+  if (!parts || parts.length === 0) return name;
+  return name + ":" + parts.map((p) => String(p)).join(":");
+}
+
 export const Keys = {
-    content: (id: string) => `content:${id}`,
-  contentIndexByCampaign: (campaignId: string) => `contentIndexByCampaign:${campaignId}`,prefix: MM_PREFIX,
+  prefix: "marketingMachine",
 
-  pageSpec: (slug: string) => keyPageSpec(slug),
-  pageHtml: (slug: string) => keyPageHtml(slug),
-  pageMeta: (slug: string) => keyPageMeta(slug),
+  // Existing keys (known)
+  pageSpec: (slug: string) => k("pageSpec", slug),
+  pageHtml: (slug: string) => k("pageHtml", slug),
+  pageMeta: (slug: string) => k("pageMeta", slug),
 
-  bulkRun: (runId: string) => keyBulkRun(runId),
-  // Campaign storage keys (store.ts compatibility)
-  campaign: (id: string) => `${MM_PREFIX}campaign:${id}`,
-  campaignIndex: () => `${MM_PREFIX}campaign:index`,
-};
+  bulkRun: (runId: string) => k("bulkRun", runId),
+
+  campaign: (id: string) => k("campaign", id),
+  campaignIndex: () => k("campaignIndex"),
+
+  // Content storage used by store.ts
+  content: (id: string) => k("content", id),
+  contentIndexByCampaign: (campaignId: string) => k("contentIndexByCampaign", campaignId),
+
+  schedule: (id: string) => k("schedule", id),
+  scheduleIndex: () => k("scheduleIndex"),
+  // Generic escape hatch (so store.ts can use Keys.anything(...) without new TS errors later)
+  any: (name: string, ...parts: Array<string | number>) => k(name, ...parts),
+} as const;

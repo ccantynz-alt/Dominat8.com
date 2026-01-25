@@ -1,9 +1,8 @@
 /**
  * buildMarker.js
  * JS-visible exports for marketing .jsx pages.
- * Keep build-safe and deterministic.
+ * Keep build-safe.
  */
-
 export const BUILD_MARKER =
   process.env.NEXT_PUBLIC_BUILD_MARKER ||
   process.env.NEXT_PUBLIC_BUILD_STAMP ||
