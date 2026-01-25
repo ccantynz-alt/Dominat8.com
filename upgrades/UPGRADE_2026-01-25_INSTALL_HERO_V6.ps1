@@ -1,8 +1,51 @@
-﻿export const dynamic = "force-dynamic";
+﻿$ErrorActionPreference = "Stop"
+
+function Find-RepoRoot {
+  param([string]$StartDir)
+  $d = (Resolve-Path -LiteralPath $StartDir).Path
+  for ($i=0; $i -lt 30; $i++) {
+    if (Test-Path -LiteralPath (Join-Path $d "package.json")) { return $d }
+    if (Test-Path -LiteralPath (Join-Path $d ".git"))        { return $d }
+    $parent = Split-Path -Parent $d
+    if ($parent -eq $d -or [string]::IsNullOrWhiteSpace($parent)) { break }
+    $d = $parent
+  }
+  throw "Could not find repo root (no package.json or .git found) starting from: $StartDir"
+}
+
+Write-Host "== UPGRADE: INSTALL HERO SYSTEM v6 ==" -ForegroundColor Cyan
+Write-Host ("PWD:  " + (Get-Location).Path)
+Write-Host ("ROOT: " + $PSScriptRoot)
+
+$RepoRoot = Find-RepoRoot -StartDir $PSScriptRoot
+Write-Host ("RepoRoot: " + $RepoRoot) -ForegroundColor Green
+
+$PagePath = Join-Path $RepoRoot "src\app\page.tsx"
+$WriteTest = Join-Path $RepoRoot "upgrades\_hero_v6_write_test.txt"
+
+if (!(Test-Path -LiteralPath (Split-Path -Parent $PagePath))) {
+  throw "Expected folder missing: " + (Split-Path -Parent $PagePath)
+}
+
+# Stamp used in HTML so you can prove deploy is updated
+$Stamp = "V6_HERO_SYSTEM_" + (Get-Date).ToString("yyyyMMdd_HHmmss")
+
+Write-Host ""
+Write-Host ("Target page: " + $PagePath) -ForegroundColor Yellow
+Write-Host ("Stamp:       " + $Stamp) -ForegroundColor Yellow
+
+# Write test
+Set-Content -LiteralPath $WriteTest -Value ("HERO_V6_WRITE_OK " + (Get-Date).ToString("s") + "Z") -Encoding UTF8
+if (!(Test-Path -LiteralPath $WriteTest)) { throw "Write test failed: $WriteTest" }
+Write-Host ("WROTE: " + $WriteTest) -ForegroundColor Green
+
+# Full file replacement (simple v6 hero  polished base, we can wow it next)
+$NewPage = @"
+export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   // PROOF markers (do not remove until we confirm live)
-  const BUILD_STAMP = "V6_HERO_SYSTEM_20260125_142938";
+  const BUILD_STAMP = "$Stamp";
   const DEPLOY_ID = BUILD_STAMP;
 
   return (
@@ -74,3 +117,22 @@ export default function HomePage() {
     </main>
   );
 }
+"@
+
+Set-Content -LiteralPath $PagePath -Value $NewPage -Encoding UTF8
+
+# Verify write
+if (!(Test-Path -LiteralPath $PagePath)) { throw "Write failed: page.tsx missing after write" }
+$check = Get-Content -LiteralPath $PagePath -Raw -Encoding UTF8
+if ($check -notmatch "Hero System v6") { throw "Verification failed: v6 marker not found in page.tsx after write." }
+if ($check -notmatch "V6_HERO_SYSTEM_") { throw "Verification failed: V6 stamp marker not found in page.tsx after write." }
+
+Write-Host ("OK WROTE: " + $PagePath) -ForegroundColor Green
+Write-Host "OK Verified: Hero System v6 markers present" -ForegroundColor Green
+
+Write-Host ""
+Write-Host "NEXT:" -ForegroundColor Cyan
+Write-Host "  git add -A"
+Write-Host "  git commit -m ""feat(home): install Hero System v6"""
+Write-Host "  git push"
+Write-Host "  npx --yes vercel@latest --prod --force"
