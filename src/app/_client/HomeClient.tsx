@@ -1,1255 +1,703 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-type Step = {
-  title: string;
-  desc: string;
-  status?: "idle" | "active" | "done";
-};
-
-function cn(...xs: Array<string | false | null | undefined>) {
-  return xs.filter(Boolean).join(" ");
-}
+type FAQ = { q: string; a: string };
 
 function clamp(n: number, a: number, b: number) {
   return Math.max(a, Math.min(b, n));
 }
 
-function useIsMounted() {
-  const [m, setM] = useState(false);
-  useEffect(() => setM(true), []);
-  return m;
-}
-
-/** -----------------------------
- *  Scroll reveal (no libs)
- *  ----------------------------- */
-function useRevealOnScroll() {
-  useEffect(() => {
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    if (!nodes.length) return;
-
-    nodes.forEach((el) => {
-      el.style.opacity = "0";
-      el.style.transform = "translateY(14px)";
-      el.style.filter = "blur(2px)";
-      el.style.transition = "opacity 700ms ease, transform 700ms ease, filter 700ms ease";
-      const d = el.getAttribute("data-reveal-delay");
-      if (d) el.style.transitionDelay = `${parseInt(d, 10)}ms`;
-    });
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            const el = e.target as HTMLElement;
-            el.style.opacity = "1";
-            el.style.transform = "translateY(0px)";
-            el.style.filter = "blur(0px)";
-            io.unobserve(el);
-          }
-        }
-      },
-      { threshold: 0.14 }
-    );
-
-    nodes.forEach((n) => io.observe(n));
-    return () => io.disconnect();
-  }, []);
-}
-
-/** -----------------------------
- *  Animated counters
- *  ----------------------------- */
 function useCountUp(target: number, active: boolean, ms: number) {
   const [v, setV] = useState(0);
-
   useEffect(() => {
     if (!active) return;
     const start = performance.now();
     let raf = 0;
-
     function tick(t: number) {
       const p = clamp((t - start) / ms, 0, 1);
       const eased = 1 - Math.pow(1 - p, 3);
       setV(target * eased);
       if (p < 1) raf = requestAnimationFrame(tick);
     }
-
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [target, active, ms]);
-
   return v;
 }
 
-/** -----------------------------
- *  Magnetic hover
- *  ----------------------------- */
-function useMagnet(ref: React.RefObject<HTMLElement>, strength = 10) {
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    let raf = 0;
-    let tx = 0;
-    let ty = 0;
-
-    function setTransform(x: number, y: number) {
-      tx = x;
-      ty = y;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        el.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
-      });
-    }
-
-    function onMove(e: PointerEvent) {
-      const r = el.getBoundingClientRect();
-      const px = (e.clientX - r.left) / Math.max(1, r.width);
-      const py = (e.clientY - r.top) / Math.max(1, r.height);
-      const dx = (px - 0.5) * 2;
-      const dy = (py - 0.5) * 2;
-      setTransform(dx * strength, dy * strength);
-    }
-
-    function onLeave() {
-      el.style.transition = "transform 240ms ease";
-      setTransform(0, 0);
-      const t = setTimeout(() => {
-        el.style.transition = "";
-      }, 260);
-      return () => clearTimeout(t);
-    }
-
-    el.addEventListener("pointermove", onMove, { passive: true });
-    el.addEventListener("pointerleave", onLeave as any, { passive: true });
-
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener("pointermove", onMove as any);
-      el.removeEventListener("pointerleave", onLeave as any);
-    };
-  }, [ref, strength]);
-}
-
-/** -----------------------------
- *  Sticky nav shrink on scroll
- *  ----------------------------- */
-function useScrollY() {
-  const [y, setY] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    function onScroll() {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setY(window.scrollY || 0));
-    }
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll as any);
-    };
-  }, []);
-  return y;
-}
-
-function Hairline() {
-  return <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />;
-}
-
-function SigBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] tracking-wide text-white/80 shadow-[0_18px_55px_rgba(0,0,0,0.45)]">
-      <span className="h-1.5 w-1.5 rounded-full bg-white/70 shadow-[0_0_18px_rgba(255,255,255,0.35)]" />
-      {children}
-    </span>
-  );
-}
-
-function GlassCard({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-3xl border border-white/12 bg-white/[0.06] shadow-[0_28px_110px_rgba(0,0,0,0.72),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-[16px]",
-        className
-      )}
-    >
-      {/* Specular highlight */}
-      <div className="pointer-events-none absolute inset-0 opacity-70">
-        <div className="absolute -left-1/3 top-[-40%] h-[280px] w-[640px] rotate-[18deg] bg-gradient-to-r from-transparent via-white/18 to-transparent blur-2xl" />
-        <div className="absolute -right-1/3 bottom-[-45%] h-[240px] w-[520px] rotate-[10deg] bg-gradient-to-r from-transparent via-white/12 to-transparent blur-2xl" />
-      </div>
-      {/* Border glow */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{
-          boxShadow:
-            "inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 0 1px rgba(255,255,255,0.02), 0 0 90px rgba(56,189,248,0.08)",
-        }}
-      />
-      <div className="relative">{children}</div>
-    </div>
-  );
-}
-
-function GradientButton({
-  children,
-  href,
-  className,
-}: {
-  children: React.ReactNode;
-  href: string;
-  className?: string;
-}) {
-  return (
-    <a
-      href={href}
-      className={cn(
-        "group relative inline-flex items-center justify-center rounded-2xl px-6 py-3 text-sm font-semibold text-black shadow-[0_28px_90px_rgba(0,0,0,0.65)] transition hover:-translate-y-[1px] active:translate-y-0",
-        className
-      )}
-      style={{
-        background:
-          "linear-gradient(90deg, rgba(56,189,248,1), rgba(168,85,247,1), rgba(34,197,94,1))",
-      }}
-    >
-      <span className="relative z-10">{children}</span>
-      <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl">
-        <span className="absolute inset-[-40%] translate-x-[-60%] rotate-[12deg] bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-0 transition duration-700 group-hover:opacity-60 group-hover:translate-x-[160%]" />
-      </span>
-      <span className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]" />
-    </a>
-  );
-}
-
-function SecondaryButton({ children, href }: { children: React.ReactNode; href: string }) {
-  return (
-    <a
-      href={href}
-      className="inline-flex items-center justify-center rounded-2xl border border-white/12 bg-white/[0.05] px-6 py-3 text-sm font-semibold text-white/85 shadow-[0_18px_55px_rgba(0,0,0,0.45)] transition hover:border-white/18 hover:bg-white/[0.065]"
-    >
-      {children}
-    </a>
-  );
-}
-
-function SectionHeader({
-  kicker,
-  title,
-  desc,
-}: {
-  kicker: string;
-  title: string;
-  desc?: string;
-}) {
-  return (
-    <div className="max-w-3xl">
-      <div className="text-xs uppercase tracking-[0.32em] text-white/55">{kicker}</div>
-      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white/90 md:text-3xl">
-        {title}
-      </h2>
-      {desc ? (
-        <p className="mt-3 text-sm leading-relaxed text-white/65 md:text-base">{desc}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function Icon({ kind }: { kind: "bolt" | "shield" | "spark" | "globe" | "wand" | "rocket" }) {
-  // Tiny inline icons (no libs)
-  const common = "h-5 w-5";
-  if (kind === "bolt")
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M13 2L3 14h8l-1 8 11-14h-8l0-6z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      </svg>
-    );
-  if (kind === "shield")
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2l8 4v6c0 5-3.5 9.4-8 10-4.5-.6-8-5-8-10V6l8-4z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-        <path d="M9 12l2 2 4-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  if (kind === "spark")
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2l1.2 5.2L18 9l-4.8 1.8L12 16l-1.2-5.2L6 9l4.8-1.8L12 2z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-        <path d="M4 15l.7 3 3 .7-3 .7-.7 3-.7-3-3-.7 3-.7.7-3z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" opacity="0.9" />
-      </svg>
-    );
-  if (kind === "globe")
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
-        <path d="M3 12h18" stroke="currentColor" strokeWidth="1.2" />
-        <path d="M12 3c2.6 2.8 2.6 14.2 0 18" stroke="currentColor" strokeWidth="1.2" />
-        <path d="M12 3c-2.6 2.8-2.6 14.2 0 18" stroke="currentColor" strokeWidth="1.2" />
-      </svg>
-    );
-  if (kind === "wand")
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 20l10-10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        <path d="M13 3l8 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        <path d="M12 6l1-3 1 3 3 1-3 1-1 3-1-3-3-1 3-1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-      </svg>
-    );
-  return (
-    <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M4 14c3-6 9-9 16-8-1 7-4 13-10 16-3 1-5 0-6-2-1-2-1-4 0-6z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M10 14l4-4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function FeatureTile({
-  icon,
-  title,
-  desc,
-  tag,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
-  tag?: string;
-}) {
-  return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.05] p-6 shadow-[0_28px_90px_rgba(0,0,0,0.55)] transition hover:border-white/16 hover:bg-white/[0.065]">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100"
-        style={{
-          background:
-            "radial-gradient(circle at 20% 10%, rgba(56,189,248,0.18), transparent 40%), radial-gradient(circle at 80% 10%, rgba(168,85,247,0.14), transparent 45%), radial-gradient(circle at 50% 85%, rgba(34,197,94,0.08), transparent 45%)",
-        }}
-      />
-      <div className="relative">
-        <div className="flex items-start justify-between gap-4">
-          <div className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-white/[0.06] text-white/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]">
-            {icon}
-          </div>
-          {tag ? (
-            <span className="rounded-full border border-white/10 bg-black/25 px-2 py-1 text-[10px] uppercase tracking-[0.22em] text-white/55">
-              {tag}
-            </span>
-          ) : null}
-        </div>
-        <div className="mt-4 text-sm font-semibold text-white/90">{title}</div>
-        <div className="mt-2 text-sm leading-relaxed text-white/65">{desc}</div>
-      </div>
-    </div>
-  );
-}
-
-function PriceCard({
-  name,
-  price,
-  highlight,
-  bullets,
-  cta,
-  href,
-}: {
-  name: string;
-  price: string;
-  highlight?: string;
-  bullets: string[];
-  cta: string;
-  href: string;
-}) {
-  const featured = !!highlight;
-  return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-3xl border p-7 shadow-[0_34px_120px_rgba(0,0,0,0.65)]",
-        featured
-          ? "border-white/18 bg-white/[0.08]"
-          : "border-white/10 bg-white/[0.05]"
-      )}
-    >
-      <div
-        className={cn(
-          "pointer-events-none absolute inset-0 opacity-0",
-          featured && "opacity-100"
-        )}
-        style={{
-          background:
-            "radial-gradient(circle at 20% 10%, rgba(56,189,248,0.16), transparent 40%), radial-gradient(circle at 80% 10%, rgba(168,85,247,0.12), transparent 45%), radial-gradient(circle at 50% 85%, rgba(34,197,94,0.08), transparent 45%)",
-        }}
-      />
-
-      <div className="relative">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <div className="text-sm font-semibold text-white/90">{name}</div>
-            <div className="mt-2 text-3xl font-semibold text-white">{price}</div>
-          </div>
-          {highlight ? (
-            <span className="rounded-full border border-white/10 bg-black/25 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-white/55">
-              {highlight}
-            </span>
-          ) : null}
-        </div>
-
-        <ul className="mt-5 space-y-2 text-sm text-white/65">
-          {bullets.map((b) => (
-            <li key={b} className="flex items-start gap-2">
-              <span className="mt-1 h-1.5 w-1.5 rounded-full bg-white/50" />
-              <span>{b}</span>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-6">
-          <a
-            href={href}
-            className={cn(
-              "inline-flex w-full items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition hover:-translate-y-[1px] active:translate-y-0",
-              featured
-                ? "text-black shadow-[0_28px_90px_rgba(0,0,0,0.65)]"
-                : "border border-white/12 bg-black/25 text-white/85 hover:bg-black/30"
-            )}
-            style={
-              featured
-                ? {
-                    background:
-                      "linear-gradient(90deg, rgba(56,189,248,1), rgba(168,85,247,1), rgba(34,197,94,1))",
-                  }
-                : undefined
-            }
-          >
-            {cta}
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FAQItem({
-  q,
-  a,
-  open,
-  onToggle,
-}: {
-  q: string;
-  a: string;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-5 py-4 transition hover:border-white/14">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between gap-4 text-left"
-      >
-        <div className="text-sm font-semibold text-white/90">{q}</div>
-        <span className="grid h-8 w-8 place-items-center rounded-xl border border-white/10 bg-black/25 text-white/70">
-          {open ? "–" : "+"}
-        </span>
-      </button>
-      <div
-        className={cn(
-          "grid transition-all duration-300 ease-out",
-          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-        )}
-      >
-        <div className="overflow-hidden">
-          <div className="mt-3 text-sm leading-relaxed text-white/65">{a}</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LogoPills() {
-  const items = ["ACME", "NORTHSTAR", "CLOUDLY", "VECTOR", "ARCADIA"];
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {items.map((x) => (
-        <span
-          key={x}
-          className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold tracking-[0.22em] text-white/55"
-        >
-          {x}
-        </span>
-      ))}
-      <span className="text-xs text-white/45">+ your logo here</span>
-    </div>
-  );
-}
-
-function TechBackdropSvg() {
-  return (
-    <svg className="absolute inset-0 h-full w-full" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-      <defs>
-        <radialGradient id="g1" cx="50%" cy="35%" r="60%">
-          <stop offset="0%" stopColor="rgba(56,189,248,0.35)" />
-          <stop offset="40%" stopColor="rgba(168,85,247,0.22)" />
-          <stop offset="80%" stopColor="rgba(34,197,94,0.10)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0)" />
-        </radialGradient>
-        <filter id="blur1" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="18" /></filter>
-        <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="10" result="b" />
-          <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.9 0" result="c" />
-          <feMerge><feMergeNode in="c" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
-      </defs>
-
-      <rect width="1200" height="800" fill="url(#g1)" />
-
-      <g opacity="0.22">
-        {Array.from({ length: 18 }).map((_, i) => {
-          const x = (i / 18) * 1200;
-          return <line key={`v-${i}`} x1={x} y1={0} x2={x} y2={800} stroke="rgba(255,255,255,0.10)" strokeWidth="1" />;
-        })}
-        {Array.from({ length: 12 }).map((_, i) => {
-          const y = (i / 12) * 800;
-          return <line key={`h-${i}`} x1={0} y1={y} x2={1200} y2={y} stroke="rgba(255,255,255,0.10)" strokeWidth="1" />;
-        })}
-      </g>
-
-      <g filter="url(#softGlow)" opacity="0.9">
-        <circle cx="760" cy="260" r="165" fill="none" stroke="rgba(56,189,248,0.45)" strokeWidth="2" />
-        <circle cx="760" cy="260" r="240" fill="none" stroke="rgba(168,85,247,0.30)" strokeWidth="2" />
-        <circle cx="760" cy="260" r="320" fill="none" stroke="rgba(34,197,94,0.18)" strokeWidth="2" />
-      </g>
-
-      <g opacity="0.85" filter="url(#blur1)">
-        <path d="M180 590 C 320 500, 420 520, 560 430" stroke="rgba(56,189,248,0.40)" strokeWidth="6" fill="none" />
-        <path d="M220 630 C 360 540, 470 560, 650 470" stroke="rgba(168,85,247,0.30)" strokeWidth="5" fill="none" />
-      </g>
-    </svg>
-  );
-}
-
 export default function HomeClient() {
-  const isMounted = useIsMounted();
-  useRevealOnScroll();
-
-  // Sticky nav state
-  const y = useScrollY();
-  const navCompact = y > 18;
-
-  // Session demo (keep)
-  const demoKey = "d8_home_demo_ran_v1";
-  const [demoRan, setDemoRan] = useState(false);
-
-  // Depth/parallax
-  const heroRef = useRef<HTMLDivElement | null>(null);
-  const [mx, setMx] = useState(0);
-  const [my, setMy] = useState(0);
-
-  // Magnetic CTA
-  const magnetRef = useRef<HTMLAnchorElement | null>(null);
-  useMagnet(magnetRef as any, 10);
-
-  // Live stamps
   const stamp = useMemo(() => new Date().toISOString(), []);
   const [probeOk, setProbeOk] = useState<null | boolean>(null);
 
-  // Credibility section visible? (for counters)
-  const proofRef = useRef<HTMLDivElement | null>(null);
-  const [proofInView, setProofInView] = useState(false);
-
-  // Counters
-  const speed = useCountUp(2.7, proofInView, 900);
-  const seo = useCountUp(98, proofInView, 1000);
-  const publish = useCountUp(12, proofInView, 950);
-
-  // FAQ
-  const faqs = useMemo(
-    () => [
-      {
-        q: "Is this just a template generator?",
-        a: "No. Dominat8 builds a structured site plan (pages + sections), then generates copy, layout rhythm, and publish-ready SEO outputs so you can iterate without chaos.",
-      },
-      {
-        q: "How do I know what I’m seeing is live (not cached)?",
-        a: "You get proof markers (HOME_STAMP) and a no-store probe check. You can also always add ?ts=123 to force a fresh fetch.",
-      },
-      {
-        q: "Can I use my own domain?",
-        a: "Yes — the publish flow is designed to be domain-ready. (Your Domain Wizard / verification steps plug into this.)",
-      },
-      {
-        q: "What’s the fastest way to look “enterprise”?",
-        a: "Strong hero hierarchy, a credibility strip, feature tiles that explain value quickly, and clean spacing — that’s exactly what V12 delivers.",
-      },
-    ],
-    []
-  );
-  const [faqOpen, setFaqOpen] = useState<number>(0);
-
-  // Demo steps
-  const steps: Step[] = useMemo(
-    () => [
-      { title: "Brand + Offer", desc: "Tone, positioning, hero promise, CTA hierarchy.", status: "done" },
-      { title: "Pages + Layout", desc: "Homepage, pricing, FAQ, contact — rhythm that sells.", status: "done" },
-      { title: "SEO + Sitemap", desc: "Metadata plan, sitemap, robots, publish sanity checks.", status: "active" },
-      { title: "Publish", desc: "Deploy proof + domain readiness so you trust what’s live.", status: "idle" },
-    ],
-    []
-  );
-
-  // Auto-demo once per session
+  // Trust probe: no-store
   useEffect(() => {
-    if (!isMounted) return;
-    try {
-      const already = sessionStorage.getItem(demoKey) === "1";
-      if (!already) {
-        sessionStorage.setItem(demoKey, "1");
-        setDemoRan(true);
-      } else {
-        setDemoRan(false);
-      }
-    } catch {
-      setDemoRan(false);
-    }
-  }, [isMounted]);
-
-  // Pointer parallax
-  useEffect(() => {
-    if (!isMounted) return;
-    const el = heroRef.current;
-    if (!el) return;
-
-    let raf = 0;
-
-    function onMove(e: PointerEvent) {
-      const r = el.getBoundingClientRect();
-      const px = (e.clientX - r.left) / Math.max(1, r.width);
-      const py = (e.clientY - r.top) / Math.max(1, r.height);
-      const dx = clamp((px - 0.5) * 2, -1, 1);
-      const dy = clamp((py - 0.5) * 2, -1, 1);
-
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        setMx(dx);
-        setMy(dy);
-      });
-    }
-
-    function onLeave() {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        setMx(0);
-        setMy(0);
-      });
-    }
-
-    el.addEventListener("pointermove", onMove, { passive: true });
-    el.addEventListener("pointerleave", onLeave, { passive: true });
-
-    return () => {
-      cancelAnimationFrame(raf);
-      el.removeEventListener("pointermove", onMove as any);
-      el.removeEventListener("pointerleave", onLeave as any);
-    };
-  }, [isMounted]);
-
-  // Probe no-store
-  useEffect(() => {
-    if (!isMounted) return;
     const url = `/api/__probe__?ts=${Date.now()}`;
     fetch(url, { cache: "no-store" })
       .then((r) => setProbeOk(r.ok))
       .catch(() => setProbeOk(false));
-  }, [isMounted]);
+  }, []);
 
-  // Proof in view (for counters)
+  // Count-up when hero is visible (simple: trigger after mount)
+  const [countsOn, setCountsOn] = useState(false);
   useEffect(() => {
-    if (!isMounted) return;
-    const el = proofRef.current;
-    if (!el) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            setProofInView(true);
-            io.disconnect();
-          }
-        }
-      },
-      { threshold: 0.18 }
-    );
-
-    io.observe(el);
-    return () => io.disconnect();
-  }, [isMounted]);
-
-  const depth = useMemo(() => {
-    const tiltX = my * -2.2;
-    const tiltY = mx * 2.4;
-    const driftX = mx * 18;
-    const driftY = my * 14;
-    const glowX = mx * 24;
-    const glowY = my * 18;
-    return { tiltX, tiltY, driftX, driftY, glowX, glowY };
-  }, [mx, my]);
-
-  const trustMode = useMemo(() => {
-    if (probeOk === null) return "Trust Mode: verifying…";
-    if (probeOk === true) return "Trust Mode: LIVE_OK (probe no-store)";
-    return "Trust Mode: WARN (probe failed)";
-  }, [probeOk]);
-
-  // Micro-kick
-  const [kick, setKick] = useState(false);
-  useEffect(() => {
-    if (!isMounted) return;
-    setKick(true);
-    const t = setTimeout(() => setKick(false), 900);
+    const t = setTimeout(() => setCountsOn(true), 250);
     return () => clearTimeout(t);
-  }, [isMounted]);
+  }, []);
+
+  const sites = useCountUp(1240, countsOn, 900);
+  const minutes = useCountUp(2.4, countsOn, 900);
+  const seo = useCountUp(98, countsOn, 1000);
+
+  const trustMode =
+    probeOk === null
+      ? "Verifying live route…"
+      : probeOk
+      ? "LIVE_OK • no-store probe confirmed"
+      : "WARN • probe failed (still may be live)";
+
+  const faqs: FAQ[] = useMemo(
+    () => [
+      {
+        q: "Why does this look different (and better) than before?",
+        a: "This homepage is fully self-contained and does not depend on Tailwind being wired correctly. It uses its own CSS, so it won’t render “broken” due to missing class styling.",
+      },
+      {
+        q: "How do I know I’m seeing the deployed version?",
+        a: "You’ll see ROUTE_PROOF + HOME_STAMP. Also, the probe request uses cache: no-store. Add ?ts=123 to force a fresh fetch any time.",
+      },
+      {
+        q: "Is Dominat8 a template generator?",
+        a: "No — it’s a structured website automation builder: brand → layout rhythm → pages → SEO + sitemap → publish proof. Templates are optional starting points.",
+      },
+      {
+        q: "Can I use my own domain?",
+        a: "Yes. This UI is built to support your Domain Wizard + verification + publish workflows.",
+      },
+    ],
+    []
+  );
+
+  const [openFAQ, setOpenFAQ] = useState<number>(0);
 
   return (
-    <main className="min-h-screen bg-[#05060A] text-white/90">
-      {/* Backdrop */}
-      <div className="pointer-events-none fixed inset-0">
-        <div
-          className="absolute inset-0 opacity-[0.85]"
-          style={{
-            transform: `translate3d(${depth.driftX * 0.25}px, ${depth.driftY * 0.20}px, 0)`,
-            transition: "transform 120ms ease-out",
-          }}
-        >
-          <TechBackdropSvg />
-        </div>
+    <>
+      {/* Self-contained CSS — does not rely on Tailwind */}
+      <style>{`
+        :root{
+          --bg0:#f7f8fb;
+          --bg1:#ffffff;
+          --ink:#0b1220;
+          --muted:#5a667a;
+          --muted2:#74829a;
+          --line:rgba(10,20,40,.10);
+          --shadow: 0 24px 70px rgba(16,24,40,.12);
+          --shadow2: 0 10px 30px rgba(16,24,40,.10);
+          --brandA:#1aa7ff;
+          --brandB:#7c3aed;
+          --brandC:#22c55e;
+          --ring: 0 0 0 6px rgba(26,167,255,.12);
+          --radius: 18px;
+          --radius2: 24px;
+          --max: 1120px;
+        }
+        .wrap{
+          background: radial-gradient(1200px 600px at 20% -10%, rgba(26,167,255,.20), transparent 60%),
+                      radial-gradient(900px 520px at 80% 0%, rgba(124,58,237,.18), transparent 60%),
+                      radial-gradient(900px 520px at 70% 90%, rgba(34,197,94,.10), transparent 65%),
+                      linear-gradient(180deg, var(--bg0), #fff 40%, #fff);
+          color: var(--ink);
+          min-height: 100vh;
+          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+        .container{
+          width: min(var(--max), calc(100% - 32px));
+          margin: 0 auto;
+        }
+        .topbar{
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          backdrop-filter: blur(14px);
+          background: rgba(247,248,251,.72);
+          border-bottom: 1px solid rgba(10,20,40,.08);
+        }
+        .nav{
+          display:flex; align-items:center; justify-content:space-between;
+          padding: 14px 0;
+          gap: 12px;
+        }
+        .brand{
+          display:flex; align-items:center; gap: 10px; min-width: 220px;
+          text-decoration:none; color: var(--ink);
+        }
+        .logo{
+          width: 40px; height: 40px; border-radius: 14px;
+          background: linear-gradient(120deg, var(--brandA), var(--brandB), var(--brandC));
+          box-shadow: var(--shadow2);
+        }
+        .brandTitle{ font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+        .brandSub{ font-size: 12px; color: var(--muted2); margin-top: 2px; }
+        .links{ display:none; gap: 22px; color: var(--muted); font-weight: 600; font-size: 14px; }
+        .links a{ color: inherit; text-decoration:none; }
+        .links a:hover{ color: var(--ink); }
+        .actions{ display:flex; align-items:center; gap: 10px; }
+        .btn{
+          display:inline-flex; align-items:center; justify-content:center;
+          height: 42px; padding: 0 16px;
+          border-radius: 14px;
+          font-weight: 800;
+          text-decoration:none;
+          border: 1px solid rgba(10,20,40,.12);
+          background: rgba(255,255,255,.8);
+          color: var(--ink);
+          box-shadow: 0 10px 26px rgba(16,24,40,.10);
+        }
+        .btn:hover{ box-shadow: 0 14px 34px rgba(16,24,40,.14); }
+        .btnPrimary{
+          border: none;
+          background: linear-gradient(90deg, var(--brandA), var(--brandB), var(--brandC));
+          color: #081018;
+          box-shadow: 0 18px 50px rgba(26,167,255,.22);
+        }
+        .btnPrimary:hover{ box-shadow: 0 22px 60px rgba(26,167,255,.28); }
+        .hero{
+          padding: 56px 0 24px;
+        }
+        .heroGrid{
+          display:grid; gap: 22px;
+          grid-template-columns: 1fr;
+          align-items: stretch;
+        }
+        .badgeRow{ display:flex; flex-wrap:wrap; gap: 10px; align-items:center; }
+        .badge{
+          display:inline-flex; align-items:center; gap: 8px;
+          padding: 6px 10px;
+          border-radius: 999px;
+          background: rgba(255,255,255,.85);
+          border: 1px solid rgba(10,20,40,.10);
+          box-shadow: 0 10px 22px rgba(16,24,40,.08);
+          font-size: 12px; font-weight: 800; color: rgba(10,20,40,.75);
+        }
+        .dot{ width: 8px; height: 8px; border-radius: 999px; background: rgba(34,197,94,.9); box-shadow: 0 0 0 5px rgba(34,197,94,.12); }
+        .stamp{ font-size: 12px; color: var(--muted2); }
+        .h1{
+          margin: 14px 0 0;
+          font-size: 44px;
+          line-height: 1.04;
+          letter-spacing: -0.04em;
+          font-weight: 900;
+        }
+        .grad{
+          background: linear-gradient(90deg, var(--brandA), var(--brandB), var(--brandC));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+        }
+        .lead{
+          margin: 14px 0 0;
+          font-size: 18px;
+          line-height: 1.55;
+          color: var(--muted);
+          max-width: 56ch;
+        }
+        .ctaRow{
+          margin-top: 18px;
+          display:flex; flex-wrap:wrap; gap: 10px; align-items:center;
+        }
+        .trust{
+          margin-top: 16px;
+          padding: 14px 14px;
+          border-radius: var(--radius);
+          background: rgba(255,255,255,.82);
+          border: 1px solid rgba(10,20,40,.10);
+          box-shadow: var(--shadow2);
+          display:flex; justify-content:space-between; gap: 10px; flex-wrap:wrap;
+        }
+        .trustLeft{ display:flex; align-items:center; gap: 10px; font-weight: 800; color: rgba(10,20,40,.78); }
+        .trustPill{
+          padding: 4px 10px;
+          border-radius: 999px;
+          font-size: 11px;
+          font-weight: 900;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(10,20,40,.04);
+          color: rgba(10,20,40,.72);
+        }
+        .panel{
+          border-radius: var(--radius2);
+          background: rgba(255,255,255,.92);
+          border: 1px solid rgba(10,20,40,.10);
+          box-shadow: var(--shadow);
+          overflow:hidden;
+        }
+        .panelHead{
+          padding: 16px 16px 0;
+          display:flex; align-items:center; justify-content:space-between; gap: 10px;
+        }
+        .panelTitle{ font-weight: 900; letter-spacing: -0.02em; }
+        .panelTag{
+          font-size: 11px; font-weight: 900; color: rgba(10,20,40,.7);
+          border: 1px solid rgba(10,20,40,.12);
+          background: rgba(10,20,40,.04);
+          padding: 4px 10px; border-radius: 999px;
+        }
+        .panelBody{ padding: 14px 16px 16px; }
+        .steps{ display:grid; gap: 10px; margin-top: 10px; }
+        .step{
+          border-radius: 16px;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(10,20,40,.02);
+          padding: 12px;
+        }
+        .stepTop{ display:flex; justify-content:space-between; gap: 10px; align-items:flex-start; }
+        .stepName{ font-weight: 900; font-size: 13px; }
+        .stepState{
+          font-size: 11px; font-weight: 900;
+          padding: 4px 10px; border-radius: 999px;
+          border: 1px solid rgba(10,20,40,.12);
+          background: rgba(255,255,255,.7);
+          color: rgba(10,20,40,.72);
+        }
+        .stepDesc{ margin-top: 6px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+        .kpiRow{
+          margin-top: 14px;
+          display:grid; grid-template-columns: 1fr; gap: 10px;
+        }
+        .kpi{
+          border-radius: 16px;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(255,255,255,.80);
+          padding: 12px;
+          box-shadow: 0 10px 24px rgba(16,24,40,.08);
+        }
+        .kpiVal{ font-weight: 950; font-size: 20px; letter-spacing: -0.02em; }
+        .kpiKey{ margin-top: 4px; font-size: 11px; font-weight: 900; color: rgba(10,20,40,.65); text-transform: uppercase; letter-spacing: .18em; }
+        .kpiHint{ margin-top: 6px; font-size: 13px; color: var(--muted); line-height: 1.45; }
 
-        <div
-          className="absolute left-1/2 top-[-12%] h-[520px] w-[920px] -translate-x-1/2 rounded-full blur-3xl"
-          style={{
-            background:
-              "radial-gradient(circle at 35% 40%, rgba(56,189,248,0.40), transparent 55%), radial-gradient(circle at 65% 45%, rgba(168,85,247,0.34), transparent 60%), radial-gradient(circle at 50% 75%, rgba(34,197,94,0.16), transparent 55%)",
-            transform: `translate3d(${depth.glowX * 0.20}px, ${depth.glowY * 0.20}px, 0)`,
-            transition: "transform 120ms ease-out",
-          }}
-        />
+        .section{ padding: 44px 0; }
+        .secHead{ display:flex; flex-direction:column; gap: 10px; }
+        .kicker{ font-size: 12px; font-weight: 900; letter-spacing: .24em; text-transform: uppercase; color: rgba(10,20,40,.55); }
+        .h2{ font-size: 32px; font-weight: 950; letter-spacing: -0.03em; margin: 0; }
+        .p{ color: var(--muted); font-size: 16px; line-height: 1.6; margin: 0; max-width: 70ch; }
+        .tiles{ margin-top: 18px; display:grid; gap: 12px; grid-template-columns: 1fr; }
+        .tile{
+          border-radius: 18px;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(255,255,255,.92);
+          box-shadow: var(--shadow2);
+          padding: 16px;
+        }
+        .tileTop{ display:flex; justify-content:space-between; gap: 10px; align-items:flex-start; }
+        .tileIcon{
+          width: 44px; height: 44px; border-radius: 16px;
+          background: rgba(10,20,40,.04);
+          border: 1px solid rgba(10,20,40,.10);
+          display:grid; place-items:center;
+          font-weight: 950;
+        }
+        .tileTag{ font-size: 11px; font-weight: 950; letter-spacing: .18em; text-transform: uppercase; color: rgba(10,20,40,.55); }
+        .tileTitle{ margin-top: 10px; font-weight: 950; letter-spacing: -0.02em; }
+        .tileDesc{ margin-top: 6px; color: var(--muted); line-height: 1.55; font-size: 14px; }
 
-        <div className="absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_30%,rgba(0,0,0,0),rgba(0,0,0,0.50)_70%,rgba(0,0,0,0.82)_100%)]" />
-      </div>
+        .logos{
+          margin-top: 16px;
+          display:flex; flex-wrap:wrap; gap: 8px; align-items:center;
+        }
+        .logoPill{
+          padding: 6px 10px;
+          border-radius: 999px;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(255,255,255,.85);
+          font-weight: 900;
+          letter-spacing: .18em;
+          font-size: 11px;
+          color: rgba(10,20,40,.58);
+        }
 
-      {/* Sticky Nav (SiteGround-level feel) */}
-      <div className="sticky top-0 z-50">
-        <div className="mx-auto max-w-6xl px-6 pt-4">
-          <div
-            className={cn(
-              "rounded-3xl border shadow-[0_22px_80px_rgba(0,0,0,0.55)] backdrop-blur-[18px] transition-all duration-300",
-              navCompact
-                ? "border-white/14 bg-black/40 py-3"
-                : "border-white/10 bg-black/25 py-4"
-            )}
-            style={{
-              boxShadow: navCompact
-                ? "0 16px 70px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)"
-                : "0 22px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)",
-            }}
-          >
-            <div className="flex items-center justify-between px-5 md:px-6" data-reveal data-reveal-delay="0">
-              <a href="/" className="flex items-center gap-3">
-                <div className="grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/[0.06] shadow-[0_18px_55px_rgba(0,0,0,0.45)]">
-                  <div
-                    className="h-3 w-3 rounded-full shadow-[0_0_24px_rgba(255,255,255,0.35)]"
-                    style={{
-                      background:
-                        "linear-gradient(90deg, rgba(56,189,248,1), rgba(168,85,247,1), rgba(34,197,94,1))",
-                    }}
-                  />
-                </div>
-                <div className="leading-tight">
-                  <div className="text-sm font-semibold tracking-wide text-white/90">Dominat8</div>
-                  <div className="text-xs text-white/55">Homepage V12 • SiteGround-level</div>
+        .pricingGrid{ margin-top: 18px; display:grid; gap: 12px; grid-template-columns: 1fr; }
+        .price{
+          border-radius: 20px;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(255,255,255,.92);
+          box-shadow: var(--shadow2);
+          padding: 18px;
+          position:relative;
+          overflow:hidden;
+        }
+        .priceFeatured{
+          border: 1px solid rgba(26,167,255,.28);
+          box-shadow: 0 24px 70px rgba(26,167,255,.16);
+        }
+        .priceName{ font-weight: 950; letter-spacing: -0.02em; }
+        .priceVal{ margin-top: 8px; font-size: 30px; font-weight: 950; letter-spacing: -0.03em; }
+        .priceSub{ margin-top: 4px; color: var(--muted); font-size: 14px; }
+        .ul{ margin-top: 12px; padding-left: 18px; color: var(--muted); line-height: 1.7; }
+        .faqGrid{ margin-top: 18px; display:grid; gap: 12px; grid-template-columns: 1fr; }
+        .faq{
+          border-radius: 18px;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(255,255,255,.92);
+          box-shadow: var(--shadow2);
+          padding: 14px;
+        }
+        .faqBtn{
+          width:100%;
+          display:flex; align-items:center; justify-content:space-between;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          text-align:left;
+        }
+        .faqQ{ font-weight: 950; letter-spacing: -0.02em; }
+        .faqPlus{
+          width: 34px; height: 34px; border-radius: 12px;
+          border: 1px solid rgba(10,20,40,.10);
+          background: rgba(10,20,40,.03);
+          display:grid; place-items:center;
+          font-weight: 950;
+          color: rgba(10,20,40,.65);
+        }
+        .faqA{ margin-top: 10px; color: var(--muted); line-height: 1.65; font-size: 14px; }
+
+        .footer{
+          padding: 36px 0 50px;
+          border-top: 1px solid rgba(10,20,40,.08);
+          background: rgba(255,255,255,.6);
+        }
+        .footerGrid{
+          display:grid; gap: 18px;
+          grid-template-columns: 1fr;
+        }
+        .footCol h4{ margin:0; font-weight:950; letter-spacing:-0.02em; }
+        .footCol a{ color: var(--muted); text-decoration:none; display:block; margin-top: 10px; font-weight: 800; }
+        .footCol a:hover{ color: var(--ink); }
+        .footSmall{ margin-top: 16px; color: var(--muted2); font-size: 12px; }
+
+        /* Responsive */
+        @media (min-width: 820px){
+          .links{ display:flex; }
+          .heroGrid{ grid-template-columns: 1.15fr .85fr; gap: 18px; }
+          .kpiRow{ grid-template-columns: repeat(3, 1fr); }
+          .tiles{ grid-template-columns: repeat(3, 1fr); }
+          .pricingGrid{ grid-template-columns: repeat(3, 1fr); }
+          .faqGrid{ grid-template-columns: repeat(2, 1fr); }
+          .footerGrid{ grid-template-columns: 1.2fr 1fr 1fr 1fr; }
+          .h1{ font-size: 54px; }
+        }
+      `}</style>
+
+      <div className="wrap">
+        {/* Top Bar */}
+        <div className="topbar">
+          <div className="container">
+            <div className="nav">
+              <a className="brand" href="/">
+                <div className="logo" />
+                <div>
+                  <div className="brandTitle">Dominat8</div>
+                  <div className="brandSub">SiteGround-level Homepage • One-shot finish</div>
                 </div>
               </a>
 
-              <nav className="hidden items-center gap-7 text-sm text-white/70 md:flex">
-                <a className="transition hover:text-white/90" href="#features">Features</a>
-                <a className="transition hover:text-white/90" href="#proof">Credibility</a>
-                <a className="transition hover:text-white/90" href="#pricing">Pricing</a>
-                <a className="transition hover:text-white/90" href="#faq">FAQ</a>
-              </nav>
+              <div className="links">
+                <a href="#features">Features</a>
+                <a href="#proof">Proof</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#faq">FAQ</a>
+              </div>
 
-              <div className="flex items-center gap-3">
-                <a
-                  href="/templates"
-                  className="hidden rounded-xl border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-white/80 transition hover:border-white/15 hover:bg-white/[0.065] md:inline-flex"
-                >
-                  Templates
-                </a>
-                <GradientButton href="/app">Launch builder</GradientButton>
+              <div className="actions">
+                <a className="btn" href="/templates">Templates</a>
+                <a className="btn btnPrimary" href="/app">Launch Builder</a>
               </div>
             </div>
           </div>
         </div>
+
+        {/* HERO */}
+        <div className="hero">
+          <div className="container">
+            <div className="heroGrid">
+              <div>
+                <div className="badgeRow">
+                  <span className="badge"><span className="dot" /> {trustMode}</span>
+                  <span className="stamp">HOME_STAMP: {stamp}</span>
+                </div>
+
+                <h1 className="h1">
+                  Build a <span className="grad">premium flagship website</span> in minutes — not weeks.
+                </h1>
+
+                <p className="lead">
+                  Dominat8 generates a clean marketing structure (hero, features, proof, pricing, FAQ),
+                  plus SEO hygiene and publish confidence — so it looks like a serious SaaS from day one.
+                </p>
+
+                <div className="ctaRow">
+                  <a className="btn btnPrimary" href="/app">Generate my site</a>
+                  <a className="btn" href="/pricing">See pricing</a>
+                  <span className="stamp">ROUTE_PROOF • you’re on the deployed homepage</span>
+                </div>
+
+                <div className="trust">
+                  <div className="trustLeft">
+                    <span className="trustPill">ROUTE_PROOF</span>
+                    <span>LIVE markers + no-store probe reduce “is this cached?” anxiety</span>
+                  </div>
+                  <div className="stamp">Tip: add <b>?ts=123</b> to force fresh fetch</div>
+                </div>
+
+                <div className="logos">
+                  {["ACME","NORTHSTAR","CLOUDLY","VECTOR","ARCADIA"].map(x => (
+                    <span className="logoPill" key={x}>{x}</span>
+                  ))}
+                  <span className="stamp">+ your logos</span>
+                </div>
+              </div>
+
+              {/* Right panel (looks like a product demo/summary) */}
+              <div className="panel" aria-label="Demo panel">
+                <div className="panelHead">
+                  <div className="panelTitle">Publishing Pipeline</div>
+                  <div className="panelTag">Auto Demo</div>
+                </div>
+                <div className="panelBody">
+                  <div className="steps">
+                    {[
+                      { n: "Brand + Offer", s: "done", d: "Headline, positioning, CTA hierarchy." },
+                      { n: "Pages + Layout", s: "done", d: "Homepage + pricing + FAQ + contact rhythm." },
+                      { n: "SEO + Sitemap", s: "active", d: "Metadata plan, sitemap, robots hygiene." },
+                      { n: "Publish Proof", s: "idle", d: "Deploy markers + domain-ready workflow." },
+                    ].map((x) => (
+                      <div className="step" key={x.n}>
+                        <div className="stepTop">
+                          <div className="stepName">{x.n}</div>
+                          <div className="stepState">{x.s}</div>
+                        </div>
+                        <div className="stepDesc">{x.d}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="kpiRow" style={{ marginTop: 14 }}>
+                    <div className="kpi">
+                      <div className="kpiVal">{Math.round(sites).toLocaleString()}+</div>
+                      <div className="kpiKey">Sites generated</div>
+                      <div className="kpiHint">Fast output without messy layout debt.</div>
+                    </div>
+                    <div className="kpi">
+                      <div className="kpiVal">{minutes.toFixed(1)} min</div>
+                      <div className="kpiKey">To first build</div>
+                      <div className="kpiHint">From idea → usable structure quickly.</div>
+                    </div>
+                    <div className="kpi">
+                      <div className="kpiVal">{Math.round(seo)}/100</div>
+                      <div className="kpiKey">SEO baseline</div>
+                      <div className="kpiHint">Hygiene-first, publish-ready defaults.</div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: 14 }} className="stamp">
+                    ROUTE_PROOF • HOME_OK • {stamp}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FEATURES */}
+        <div id="features" className="section">
+          <div className="container">
+            <div className="secHead">
+              <div className="kicker">Features</div>
+              <h2 className="h2">SiteGround-style structure that sells fast.</h2>
+              <p className="p">
+                Big, clear sections. Premium spacing. Scannable tiles. No “broken UI” dependency on Tailwind.
+              </p>
+            </div>
+
+            <div className="tiles">
+              {[
+                ["A1","Finish-for-me structure","Pages + sections generated in a coherent plan — not random blocks.","core"],
+                ["B2","Premium hierarchy","Hero → features → proof → pricing → FAQ — the proven flow.","conversion"],
+                ["C3","SEO hygiene","Metadata, sitemap, robots defaults you can ship.","seo"],
+                ["D4","Publish confidence","Stamps + probe checks end the uncertainty.","trust"],
+                ["E5","Templates optional","Start from templates or go pure generation.","flexible"],
+                ["F6","Scale later","Add domains, billing, agents — without redoing the homepage.","scale"],
+              ].map(([ic,t,d,tag]) => (
+                <div className="tile" key={t}>
+                  <div className="tileTop">
+                    <div className="tileIcon">{ic}</div>
+                    <div className="tileTag">{tag}</div>
+                  </div>
+                  <div className="tileTitle">{t}</div>
+                  <div className="tileDesc">{d}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* PROOF */}
+        <div id="proof" className="section" style={{ paddingTop: 10 }}>
+          <div className="container">
+            <div className="secHead">
+              <div className="kicker">Proof</div>
+              <h2 className="h2">Credibility layer: metrics, logos, and proof markers.</h2>
+              <p className="p">
+                This is the “serious SaaS” middle: enterprise clarity without being loud.
+              </p>
+            </div>
+
+            <div className="panel" style={{ marginTop: 18 }}>
+              <div className="panelHead">
+                <div className="panelTitle">Deploy Proof</div>
+                <div className="panelTag">no-store probe</div>
+              </div>
+              <div className="panelBody">
+                <div className="kpiRow">
+                  <div className="kpi">
+                    <div className="kpiVal">{probeOk === null ? "…" : probeOk ? "LIVE_OK" : "WARN"}</div>
+                    <div className="kpiKey">Route status</div>
+                    <div className="kpiHint">Probe fetched with cache: no-store.</div>
+                  </div>
+                  <div className="kpi">
+                    <div className="kpiVal">HOME_OK</div>
+                    <div className="kpiKey">Proof marker</div>
+                    <div className="kpiHint">If visible, you’re on the deployed homepage.</div>
+                  </div>
+                  <div className="kpi">
+                    <div className="kpiVal">{stamp.slice(0,19).replace("T"," ")}</div>
+                    <div className="kpiKey">Stamp</div>
+                    <div className="kpiHint">Helps confirm what version you see.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* PRICING */}
+        <div id="pricing" className="section">
+          <div className="container">
+            <div className="secHead">
+              <div className="kicker">Pricing</div>
+              <h2 className="h2">Start free. Upgrade when you’re ready.</h2>
+              <p className="p">
+                This section closes like top SaaS/hosting pages: simple tiers + clear CTA.
+              </p>
+            </div>
+
+            <div className="pricingGrid">
+              <div className="price">
+                <div className="priceName">Free</div>
+                <div className="priceVal">$0</div>
+                <div className="priceSub">Get your first premium structure.</div>
+                <ul className="ul">
+                  <li>Generate homepage structure</li>
+                  <li>Templates library access</li>
+                  <li>Proof markers</li>
+                </ul>
+                <div style={{ marginTop: 14 }}>
+                  <a className="btn btnPrimary" href="/app">Start free</a>
+                </div>
+              </div>
+
+              <div className="price priceFeatured">
+                <div className="priceName">Pro</div>
+                <div className="priceVal">Power</div>
+                <div className="priceSub">Publishing + automation muscle.</div>
+                <ul className="ul">
+                  <li>Publish-ready outputs</li>
+                  <li>Domain-ready workflows</li>
+                  <li>More automation + controls</li>
+                </ul>
+                <div style={{ marginTop: 14 }}>
+                  <a className="btn btnPrimary" href="/pricing">Go Pro</a>
+                </div>
+              </div>
+
+              <div className="price">
+                <div className="priceName">Team</div>
+                <div className="priceVal">Scale</div>
+                <div className="priceSub">For serious growth.</div>
+                <ul className="ul">
+                  <li>Collaboration workflows</li>
+                  <li>Shared templates</li>
+                  <li>Advanced governance</li>
+                </ul>
+                <div style={{ marginTop: 14 }}>
+                  <a className="btn" href="/pricing">See Team</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div id="faq" className="section" style={{ paddingTop: 10 }}>
+          <div className="container">
+            <div className="secHead">
+              <div className="kicker">FAQ</div>
+              <h2 className="h2">Remove hesitation. Make it obvious.</h2>
+              <p className="p">A clean close like SiteGround: clarity beats hype.</p>
+            </div>
+
+            <div className="faqGrid">
+              {faqs.map((x, i) => {
+                const open = openFAQ === i;
+                return (
+                  <div className="faq" key={x.q}>
+                    <button className="faqBtn" type="button" onClick={() => setOpenFAQ(open ? -1 : i)}>
+                      <div className="faqQ">{x.q}</div>
+                      <div className="faqPlus">{open ? "–" : "+"}</div>
+                    </button>
+                    {open ? <div className="faqA">{x.a}</div> : null}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* FOOTER */}
+        <div className="footer">
+          <div className="container">
+            <div className="footerGrid">
+              <div className="footCol">
+                <h4>Dominat8</h4>
+                <div className="footSmall">AI Website Automation Builder</div>
+                <div className="footSmall">ROUTE_PROOF • HOME_STAMP: {stamp}</div>
+              </div>
+              <div className="footCol">
+                <h4>Product</h4>
+                <a href="/templates">Templates</a>
+                <a href="/use-cases">Use-cases</a>
+                <a href="/pricing">Pricing</a>
+              </div>
+              <div className="footCol">
+                <h4>Build</h4>
+                <a href="/app">Launch builder</a>
+                <a href="#features">Features</a>
+                <a href="#faq">FAQ</a>
+              </div>
+              <div className="footCol">
+                <h4>Trust</h4>
+                <div className="footSmall">
+                  Probe: {probeOk === null ? "…" : probeOk ? "LIVE_OK" : "WARN"} • cache: no-store
+                </div>
+                <div className="footSmall">© {new Date().getFullYear()} Dominat8</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ height: 18 }} />
       </div>
-
-      {/* Hero */}
-      <section className="relative z-10">
-        <div
-          ref={heroRef}
-          className="mx-auto grid min-h-[calc(100vh-120px)] max-w-6xl grid-cols-1 gap-10 px-6 py-10 md:grid-cols-12 md:py-14"
-        >
-          <div className="md:col-span-7" data-reveal data-reveal-delay="80">
-            <div className="flex flex-wrap items-center gap-3">
-              <SigBadge>LIVE_OK • fullscreen hero • SiteGround-level polish</SigBadge>
-              <span className="text-xs text-white/55">HOME_STAMP: {stamp}</span>
-            </div>
-
-            <h1 className="mt-6 text-4xl font-semibold leading-[1.05] tracking-tight text-white md:text-6xl">
-              Build a{" "}
-              <span
-                className="bg-clip-text text-transparent"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(90deg, rgba(56,189,248,1), rgba(168,85,247,1), rgba(34,197,94,1))",
-                }}
-              >
-                premium
-              </span>{" "}
-              site that looks enterprise.
-            </h1>
-
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-white/70 md:text-lg">
-              Hero that sells. Feature tiles that explain fast. Credibility that feels real. Pricing/FAQ that closes.
-              Dominat8 gives you structured output — and proof you can trust.
-            </p>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <GradientButton href="/app" className="will-change-transform">
-                <span ref={magnetRef as any}>Generate my site</span>
-              </GradientButton>
-              <SecondaryButton href="/pricing">See pricing</SecondaryButton>
-              <div className="text-xs text-white/55">No guessing • publish-ready • deploy proof</div>
-            </div>
-
-            {/* Trust strip */}
-            <div className="mt-8" data-reveal data-reveal-delay="140">
-              <GlassCard className="p-4">
-                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "h-2 w-2 rounded-full",
-                        probeOk === null ? "bg-white/50" : probeOk ? "bg-emerald-400" : "bg-amber-300"
-                      )}
-                    />
-                    <div className="text-xs font-semibold text-white/85">{trustMode}</div>
-                  </div>
-                  <div className="text-xs text-white/55">
-                    Probe fetched with <span className="text-white/70">cache: no-store</span>
-                  </div>
-                </div>
-              </GlassCard>
-            </div>
-
-            {/* Credibility strip */}
-            <div id="proof" ref={proofRef} className="mt-8" data-reveal data-reveal-delay="160">
-              <GlassCard className="p-6">
-                <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.32em] text-white/55">Enterprise credibility</div>
-                    <div className="mt-2 text-sm font-semibold text-white/90">
-                      Proof markers + animated metrics.
-                    </div>
-                    <div className="mt-2 text-sm leading-relaxed text-white/65">
-                      This is the “serious SaaS” layer: metrics, logos, and route proof to end doubt.
-                    </div>
-                  </div>
-                  <div className="md:text-right">
-                    <div className="text-xs text-white/55">Proof marker:</div>
-                    <div className="mt-1 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-[11px] text-white/70">
-                      ROUTE_PROOF • HOME_OK • {stamp}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
-                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <div className="text-lg font-semibold text-white/90">{speed.toFixed(1)} min</div>
-                    <div className="mt-1 text-[10px] uppercase tracking-[0.28em] text-white/55">Speed to first build</div>
-                    <div className="mt-2 text-xs leading-relaxed text-white/60">Usable structure in minutes.</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <div className="text-lg font-semibold text-white/90">{Math.round(seo)} / 100</div>
-                    <div className="mt-1 text-[10px] uppercase tracking-[0.28em] text-white/55">SEO baseline</div>
-                    <div className="mt-2 text-xs leading-relaxed text-white/60">Metadata + sitemap habits.</div>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                    <div className="text-lg font-semibold text-white/90">{Math.round(publish)} checks</div>
-                    <div className="mt-1 text-[10px] uppercase tracking-[0.28em] text-white/55">Publish sanity checks</div>
-                    <div className="mt-2 text-xs leading-relaxed text-white/60">Stamps + probe + markers.</div>
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <div className="text-[10px] uppercase tracking-[0.28em] text-white/50">Trusted by teams (placeholders)</div>
-                  <div className="mt-3"><LogoPills /></div>
-                </div>
-              </GlassCard>
-            </div>
-          </div>
-
-          {/* Right demo */}
-          <div className="md:col-span-5" data-reveal data-reveal-delay="120">
-            <div
-              className="relative"
-              style={{
-                transform: `perspective(900px) rotateX(${depth.tiltX}deg) rotateY(${depth.tiltY}deg) translate3d(0,0,0)`,
-                transformStyle: "preserve-3d",
-                transition: "transform 120ms ease-out",
-              }}
-            >
-              <div
-                className="absolute inset-0 rounded-3xl opacity-80"
-                style={{
-                  background:
-                    "linear-gradient(140deg, rgba(56,189,248,0.55), rgba(168,85,247,0.42), rgba(34,197,94,0.22))",
-                }}
-              />
-              <div className="relative rounded-3xl p-[1px]">
-                <GlassCard className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-semibold text-white/90">Auto Demo</div>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] uppercase tracking-[0.22em] text-white/60">
-                      {demoRan ? "ran this session" : "ready"}
-                    </span>
-                  </div>
-
-                  <div className="relative mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/25 p-5">
-                    <div
-                      className={cn(
-                        "absolute left-1/2 top-1/2 h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-0",
-                        kick && "opacity-100"
-                      )}
-                      style={{
-                        border: "1px solid rgba(255,255,255,0.20)",
-                        boxShadow: "0 0 80px rgba(56,189,248,0.10)",
-                        transform: `translate(-50%, -50%) scale(${kick ? 1.15 : 0.85})`,
-                        transition: "transform 900ms ease-out, opacity 900ms ease-out",
-                      }}
-                    />
-                    <div
-                      className="absolute inset-0 opacity-70"
-                      style={{
-                        background:
-                          "radial-gradient(circle at 35% 30%, rgba(56,189,248,0.18), transparent 55%), radial-gradient(circle at 75% 35%, rgba(168,85,247,0.14), transparent 60%), radial-gradient(circle at 55% 80%, rgba(34,197,94,0.08), transparent 55%)",
-                      }}
-                    />
-                    <div className="relative">
-                      <div className="text-xs uppercase tracking-[0.28em] text-white/55">Pipeline Preview</div>
-                      <div className="mt-2 text-sm font-semibold text-white/90">Structured steps that feel “finish-for-me”</div>
-
-                      <div className="mt-4 space-y-3">
-                        {steps.map((s) => (
-                          <div
-                            key={s.title}
-                            className={cn(
-                              "rounded-2xl border p-4 transition",
-                              s.status === "done"
-                                ? "border-white/12 bg-white/[0.05]"
-                                : s.status === "active"
-                                ? "border-white/18 bg-white/[0.07]"
-                                : "border-white/10 bg-white/[0.04]"
-                            )}
-                          >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="text-xs font-semibold text-white/85">{s.title}</div>
-                              <span
-                                className={cn(
-                                  "rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.22em]",
-                                  s.status === "done"
-                                    ? "bg-emerald-500/15 text-emerald-200 border border-emerald-400/25"
-                                    : s.status === "active"
-                                    ? "bg-sky-500/15 text-sky-200 border border-sky-400/25"
-                                    : "bg-white/5 text-white/55 border border-white/10"
-                                )}
-                              >
-                                {s.status ?? "idle"}
-                              </span>
-                            </div>
-                            <div className="mt-1 text-xs leading-relaxed text-white/60">{s.desc}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-5 grid grid-cols-2 gap-3">
-                        <a
-                          href="/templates"
-                          className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-center text-xs font-semibold text-white/85 transition hover:border-white/15 hover:bg-white/[0.065]"
-                        >
-                          Explore templates
-                        </a>
-                        <a
-                          href="/use-cases"
-                          className="rounded-2xl px-4 py-3 text-center text-xs font-semibold text-black transition hover:-translate-y-[1px]"
-                          style={{
-                            background:
-                              "linear-gradient(90deg, rgba(56,189,248,1), rgba(168,85,247,1), rgba(34,197,94,1))",
-                          }}
-                        >
-                          See use-cases
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.05] p-4 text-xs text-white/70">
-                    <div className="font-semibold text-white/85">ROUTE_PROOF</div>
-                    <div className="mt-1">If you see this, you are on the deployed homepage route.</div>
-                    <div className="mt-2 text-white/55">HOME_STAMP: {stamp}</div>
-                  </div>
-                </GlassCard>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Tiles (SiteGround-style value explanation) */}
-      <section id="features" className="relative z-10">
-        <div className="mx-auto max-w-6xl px-6 py-16">
-          <div data-reveal data-reveal-delay="0">
-            <SectionHeader
-              kicker="Features"
-              title="Everything your homepage needs to feel premium."
-              desc="This is the “SiteGround-level” middle: fast scanning tiles that explain value in 6 seconds."
-            />
-          </div>
-
-          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div data-reveal data-reveal-delay="60">
-              <FeatureTile
-                icon={<Icon kind="wand" />}
-                title="Finish-for-me structure"
-                desc="Pages + sections + rhythm generated in a coherent plan — not random blocks."
-                tag="core"
-              />
-            </div>
-            <div data-reveal data-reveal-delay="90">
-              <FeatureTile
-                icon={<Icon kind="spark" />}
-                title="Premium copy + hierarchy"
-                desc="Headlines, subheads, CTAs, and proof sections that read like a product."
-                tag="conversion"
-              />
-            </div>
-            <div data-reveal data-reveal-delay="120">
-              <FeatureTile
-                icon={<Icon kind="bolt" />}
-                title="Speed without mess"
-                desc="Fast output that stays editable. No bloat, no confusing layout debt."
-                tag="speed"
-              />
-            </div>
-            <div data-reveal data-reveal-delay="150">
-              <FeatureTile
-                icon={<Icon kind="globe" />}
-                title="SEO hygiene built-in"
-                desc="Metadata plan, sitemap, robots — ready for Search Console workflows."
-                tag="seo"
-              />
-            </div>
-            <div data-reveal data-reveal-delay="180">
-              <FeatureTile
-                icon={<Icon kind="shield" />}
-                title="Deploy confidence"
-                desc="Proof markers + no-store probe checks so you always know what’s live."
-                tag="trust"
-              />
-            </div>
-            <div data-reveal data-reveal-delay="210">
-              <FeatureTile
-                icon={<Icon kind="rocket" />}
-                title="Publish-ready pipeline"
-                desc="Structured steps for generation → refinement → publish, designed to scale with you."
-                tag="publish"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing teaser (SiteGround-style) */}
-      <section id="pricing" className="relative z-10">
-        <div className="mx-auto max-w-6xl px-6 pb-16">
-          <div data-reveal data-reveal-delay="0">
-            <SectionHeader
-              kicker="Pricing"
-              title="Start free. Go pro when it’s time to scale."
-              desc="A clean pricing teaser closes the loop like top hosting/SaaS pages."
-            />
-          </div>
-
-          <div className="mt-10 grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div data-reveal data-reveal-delay="60">
-              <PriceCard
-                name="Free"
-                price="$0"
-                bullets={[
-                  "Generate structure + copy",
-                  "Preview your site",
-                  "Proof markers on deploy",
-                ]}
-                cta="Start free"
-                href="/app"
-              />
-            </div>
-            <div data-reveal data-reveal-delay="90">
-              <PriceCard
-                name="Pro"
-                price="Power"
-                highlight="Most popular"
-                bullets={[
-                  "Publishing controls",
-                  "Domain-ready workflows",
-                  "Stronger automation",
-                ]}
-                cta="Go Pro"
-                href="/pricing"
-              />
-            </div>
-            <div data-reveal data-reveal-delay="120">
-              <PriceCard
-                name="Team"
-                price="Scale"
-                bullets={[
-                  "Collaboration workflows",
-                  "Shared templates",
-                  "Advanced governance",
-                ]}
-                cta="See Team"
-                href="/pricing"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="relative z-10">
-        <div className="mx-auto max-w-6xl px-6 pb-16">
-          <div data-reveal data-reveal-delay="0">
-            <SectionHeader
-              kicker="FAQ"
-              title="Answers that remove hesitation."
-              desc="SiteGround-style pages close with clarity: what it is, how it works, and why you can trust it."
-            />
-          </div>
-
-          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
-            {faqs.map((x, i) => (
-              <div key={x.q} data-reveal data-reveal-delay={60 + i * 40}>
-                <FAQItem
-                  q={x.q}
-                  a={x.a}
-                  open={faqOpen === i}
-                  onToggle={() => setFaqOpen((cur) => (cur === i ? -1 : i))}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA band + Premium Footer */}
-      <section className="relative z-10" id="cta">
-        <div className="mx-auto max-w-6xl px-6 pb-16">
-          <div data-reveal data-reveal-delay="0">
-            <GlassCard className="p-8 md:p-10">
-              <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-                <div className="max-w-2xl">
-                  <div className="text-xs uppercase tracking-[0.32em] text-white/55">Ready</div>
-                  <h3 className="mt-3 text-2xl font-semibold tracking-tight text-white/90 md:text-3xl">
-                    Generate your flagship site now.
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-white/65 md:text-base">
-                    This is the “finished” landing page shape: hero → features → credibility → pricing → FAQ → close.
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3 sm:flex-row">
-                  <GradientButton href="/app">Start now</GradientButton>
-                  <SecondaryButton href="/templates">Browse templates</SecondaryButton>
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <Hairline />
-              </div>
-
-              <footer className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-12">
-                <div className="md:col-span-4">
-                  <div className="flex items-center gap-3">
-                    <div className="grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/[0.06]">
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{
-                          background:
-                            "linear-gradient(90deg, rgba(56,189,248,1), rgba(168,85,247,1), rgba(34,197,94,1))",
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <div className="text-sm font-semibold text-white/90">Dominat8</div>
-                      <div className="text-xs text-white/55">AI Website Automation Builder</div>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm leading-relaxed text-white/65">
-                    Built to output premium pages fast — with proof markers and structured pipelines that scale.
-                  </p>
-                  <div className="mt-4 text-xs text-white/50">HOME_OK • {stamp}</div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <div className="text-xs uppercase tracking-[0.28em] text-white/50">Product</div>
-                  <div className="mt-3 space-y-2 text-sm text-white/70">
-                    <a className="block hover:text-white/90" href="/templates">Templates</a>
-                    <a className="block hover:text-white/90" href="/use-cases">Use-cases</a>
-                    <a className="block hover:text-white/90" href="/pricing">Pricing</a>
-                  </div>
-                </div>
-
-                <div className="md:col-span-3">
-                  <div className="text-xs uppercase tracking-[0.28em] text-white/50">Build</div>
-                  <div className="mt-3 space-y-2 text-sm text-white/70">
-                    <a className="block hover:text-white/90" href="/app">Launch builder</a>
-                    <a className="block hover:text-white/90" href="#features">Features</a>
-                    <a className="block hover:text-white/90" href="#faq">FAQ</a>
-                  </div>
-                </div>
-
-                <div className="md:col-span-3">
-                  <div className="text-xs uppercase tracking-[0.28em] text-white/50">Trust</div>
-                  <div className="mt-3 space-y-2 text-sm text-white/70">
-                    <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
-                      <div className="text-xs font-semibold text-white/85">Route proof</div>
-                      <div className="mt-2 text-xs text-white/60">
-                        ROUTE_PROOF markers + probe checks to reduce “is this live?” anxiety.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </footer>
-
-              <div className="mt-10 text-xs text-white/45">
-                © {new Date().getFullYear()} Dominat8 • Presentation-grade homepage V12
-              </div>
-            </GlassCard>
-          </div>
-        </div>
-      </section>
-
-      <div className="relative z-10 h-10" />
-    </main>
+    </>
   );
 }
