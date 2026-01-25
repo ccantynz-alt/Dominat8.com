@@ -35,15 +35,23 @@ export async function GET() {
   const stamp = `PROBE_${nowIso.replace(/[-:.TZ]/g, "")}`;
 
   const env = getEnv();
-  const body = { ok: true, nowIso, stamp, ...env };
+
+  const body = {
+    ok: true,
+    nowIso,
+    stamp,
+    ...env,
+  };
 
   const res = NextResponse.json(body, { status: 200 });
 
+  // Strong "no cache" headers
   res.headers.set("cache-control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.headers.set("pragma", "no-cache");
   res.headers.set("expires", "0");
   res.headers.set("surrogate-control", "no-store");
 
+  // Proof headers (easy to grep)
   res.headers.set("x-dominat8-probe", "1");
   res.headers.set("x-dominat8-stamp", stamp);
   if (env.gitSha) res.headers.set("x-dominat8-git-sha", env.gitSha);

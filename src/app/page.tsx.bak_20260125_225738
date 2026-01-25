@@ -1,11 +1,14 @@
 import nextDynamic from "next/dynamic";
 
-// TRUST MODE: force dynamic rendering (prevents static caching surprises)
+// HARD: force this page to be dynamic (prevents static caching surprises)
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+// In newer Next versions, this also helps enforce no-store behavior:
 export const fetchCache = "force-no-store";
 
-const HomeClient = nextDynamic(() => import("./_client/HomeClient"), { ssr: false });
+const HomeClient = nextDynamic(() => import("./_client/HomeClient"), {
+  ssr: false,
+});
 
 function getDeployInfo() {
   const env = process.env;
@@ -33,11 +36,19 @@ function getDeployInfo() {
 
   const serverIso = new Date().toISOString();
 
-  return { serverIso, deployId, gitSha, gitRef, nodeEnv, vercelEnv };
+  return {
+    serverIso,
+    deployId,
+    gitSha,
+    gitRef,
+    nodeEnv,
+    vercelEnv,
+  };
 }
 
 export default function Page() {
   const deploy = getDeployInfo();
+
   return (
     <main className="min-h-screen bg-black text-white">
       <HomeClient deploy={deploy} />
