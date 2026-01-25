@@ -1,147 +1,136 @@
-﻿export const dynamic = "force-dynamic";
-
-import { BUILD_MARKER, MONSTER_MARKER } from "../lib/buildMarker";
-import { TopBar, HeaderNav, Footer } from "../components/marketing/MarketingShell";
-
-function Pill({ children }) {
-  return (
-    <div className="inline-flex items-center gap-2 rounded-full bg-white/80 px-4 py-2 text-xs text-slate-700 ring-1 ring-slate-200 shadow-sm d8-fade-up d8-delay-0">
-      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-      {children}
-    </div>
-  );
-}
-
-function ProofTile({ title, desc }) {
-  return (
-    <div className="rounded-2xl bg-white/85 p-4 ring-1 ring-slate-200 shadow-sm">
-      <div className="text-xs font-semibold text-slate-700">✔ {title}</div>
-      <div className="mt-1 text-xs text-slate-600">{desc}</div>
-    </div>
-  );
-}
+﻿import Link from "next/link";
+import { buildMarker } from "@/src/lib/buildMarker";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      {/* WOW BACKGROUND LAYERS (CSS-only) */}
-      <div className="d8-wow-bg" aria-hidden="true">
-        <div className="d8-wow-orb d8-wow-orb-a" />
-        <div className="d8-wow-orb d8-wow-orb-b" />
-        <div className="d8-wow-orb d8-wow-orb-c" />
-        <div className="d8-wow-grid" />
-        <div className="d8-wow-noise" />
-        <div className="d8-wow-vignette" />
-      </div>
+    <main className="d8-page">
+      {/* Deploy-proof marker (view-source / curl grep friendly) */}
+      <span className="d8-marker" aria-hidden="true">
+        {buildMarker()}
+      </span>
 
-      <TopBar />
-      <HeaderNav />
+      {/* FULL-SCREEN HERO TAKEOVER */}
+      <section className="d8-hero-full">
+        {/* WOW background layers (CSS-only) */}
+        <div className="d8-wow-bg" aria-hidden="true">
+          <div className="d8-orb d8-orb-a" />
+          <div className="d8-orb d8-orb-b" />
+          <div className="d8-orb d8-orb-c" />
+          <div className="d8-grid" />
+          <div className="d8-noise" />
+          <div className="d8-vignette" />
+        </div>
 
-      {/* HERO: FULL SCREEN TAKEOVER */}
-      <section className="mx-auto max-w-6xl px-6 pt-6 pb-10 d8-hero-full">
-        <div className="flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
-          {/* Left */}
-          <div className="max-w-2xl">
-            <Pill>
-              Premium, clean, fast — SiteGround-style build
-              <span className="ml-2 font-mono text-slate-500">({BUILD_MARKER})</span>
-            </Pill>
-
-            <h1 className="mt-6 text-5xl font-semibold tracking-tight text-slate-950 md:text-6xl d8-fade-up d8-delay-1">
-              Build a website <br />
-              that looks expensive. <br />
-              Automatically.
-            </h1>
-
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-slate-700 md:text-lg d8-fade-up d8-delay-2">
-              Dominat8 generates a <span className="font-semibold text-slate-900">complete, production-ready website</span> from a brief —
-              then runs pages, SEO, sitemap, and publish automatically (with controls you can trust).
-            </p>
-
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row d8-fade-up d8-delay-3">
-              <a
-                className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-800 shadow-sm d8-btn-lift"
-                href="/p/new"
-              >
-                Generate my site
-              </a>
-
-              <a
-                className="inline-flex items-center justify-center rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 hover:bg-slate-50 shadow-sm d8-btn-lift"
-                href="/gallery"
-              >
-                See real examples
-              </a>
-            </div>
-
-            <div className="mt-8 grid gap-3 sm:grid-cols-2 d8-fade-up d8-delay-4">
-              <ProofTile title="Publish-ready HTML" desc="Clean output, structured sections, consistent rhythm." />
-              <ProofTile title="SEO included" desc="Titles, metas, schema, sitemap + robots." />
-              <ProofTile title="Custom domain ready" desc="Publish + map when you’re ready." />
-              <ProofTile title="No templates to fight" desc="Premium layout defaults that stay consistent." />
-            </div>
-
-            {/* Scroll cue */}
-            <div className="mt-10 d8-fade-up d8-delay-4">
-              <div className="inline-flex items-center gap-3 rounded-full bg-white/70 px-4 py-2 text-xs text-slate-600 ring-1 ring-slate-200 shadow-sm">
-                <span className="font-mono text-slate-500">Marker:</span>
-                <span className="font-mono text-slate-700">{MONSTER_MARKER}</span>
-                <span className="mx-1 text-slate-300">•</span>
-                <span>Scroll</span>
-                <span className="d8-scroll-dot" aria-hidden="true" />
+        {/* V7: premium glow aura wrapper (CSS-only hover/focus/always-on-touch) */}
+        <div className="d8-glow-wrap">
+          <div className="d8-hero-inner">
+            <header className="d8-hero-copy">
+              <div className="d8-pill">
+                <span className="d8-dot" />
+                <span>Dominat8 — AI Website Automation Builder</span>
               </div>
-            </div>
-          </div>
 
-          {/* Right trust card */}
-          <div className="w-full max-w-md d8-fade-up d8-delay-2">
-            <div className="rounded-3xl bg-white/80 p-6 ring-1 ring-slate-200 shadow-sm d8-card-float">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-xs text-slate-500">Trusted quality</div>
-                  <div className="mt-2 text-lg font-semibold text-slate-950">
-                    Premium output, every time
+              <h1 className="d8-h1">
+                Build a <span className="d8-grad">premium website</span> in minutes.
+              </h1>
+
+              <p className="d8-sub">
+                Describe your business. Dominat8 generates the homepage, pages, layout, and structure —
+                ready to publish.
+              </p>
+
+              <div className="d8-cta-row">
+                <Link className="d8-btn d8-btn-primary" href="/sign-in">
+                  Start building
+                </Link>
+                <Link className="d8-btn d8-btn-ghost" href="/templates">
+                  Explore templates
+                </Link>
+              </div>
+
+              <div className="d8-trust">
+                <div className="d8-trust-item">⚡ Fast publish</div>
+                <div className="d8-trust-item">🔎 SEO-ready</div>
+                <div className="d8-trust-item">🌐 Custom domains</div>
+              </div>
+            </header>
+
+            <aside className="d8-hero-card" aria-label="Preview card">
+              <div className="d8-card-top">
+                <div className="d8-card-dots">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="d8-card-title">Preview</div>
+              </div>
+
+              <div className="d8-card-body">
+                <div className="d8-card-kicker">AI-generated site spec</div>
+                <div className="d8-card-line" />
+                <div className="d8-card-line d8-card-line2" />
+                <div className="d8-card-line d8-card-line3" />
+
+                <div className="d8-mini-grid">
+                  <div className="d8-mini-tile">
+                    <div className="d8-mini-head">Hero</div>
+                    <div className="d8-mini-sub">Full-screen takeover</div>
+                  </div>
+                  <div className="d8-mini-tile">
+                    <div className="d8-mini-head">Pages</div>
+                    <div className="d8-mini-sub">Pricing • FAQ • Contact</div>
+                  </div>
+                  <div className="d8-mini-tile">
+                    <div className="d8-mini-head">SEO</div>
+                    <div className="d8-mini-sub">Meta • Sitemap • Robots</div>
+                  </div>
+                  <div className="d8-mini-tile">
+                    <div className="d8-mini-head">Publish</div>
+                    <div className="d8-mini-sub">Vercel-ready output</div>
                   </div>
                 </div>
-                <div className="text-amber-500 text-sm" aria-label="5 stars">
-                  ★★★★★
+
+                <div className="d8-card-foot">
+                  <span className="d8-tag">CSS-only WOW</span>
+                  <span className="d8-tag">Build-gated</span>
+                  <span className="d8-tag">V7 Glow</span>
                 </div>
               </div>
+            </aside>
+          </div>
 
-              <div className="mt-5 rounded-2xl bg-white p-5 ring-1 ring-slate-200">
-                <div className="text-xs font-semibold text-slate-600">What you get</div>
-                <div className="mt-3 space-y-2 text-sm text-slate-700">
-                  <div className="flex items-center gap-2"><span className="text-emerald-600">✓</span> Homepage + marketing pages</div>
-                  <div className="flex items-center gap-2"><span className="text-emerald-600">✓</span> SEO plan + sitemap</div>
-                  <div className="flex items-center gap-2"><span className="text-emerald-600">✓</span> Publish-ready HTML</div>
-                </div>
-              </div>
+          {/* Scroll hint */}
+          <div className="d8-scroll-hint" aria-hidden="true">
+            <span className="d8-scroll-dot" />
+            <span className="d8-scroll-text">Scroll</span>
+          </div>
+        </div>
+      </section>
 
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <a className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800 shadow-sm d8-btn-lift" href="/pricing">
-                  View pricing
-                </a>
-                <a className="inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200 hover:bg-slate-50 shadow-sm d8-btn-lift" href="/__status">
-                  Check status
-                </a>
-              </div>
+      {/* Below the fold (safe placeholder) */}
+      <section className="d8-below">
+        <div className="d8-below-inner">
+          <h2 className="d8-h2">What happens after the hero?</h2>
+          <p className="d8-below-sub">
+            Next we add the conversion sections: logo strip, how-it-works, proof blocks, and a KV-backed gallery.
+          </p>
+
+          <div className="d8-below-grid">
+            <div className="d8-below-card">
+              <div className="d8-below-head">Option B</div>
+              <div className="d8-below-body">3 real examples (KV-backed gallery)</div>
+            </div>
+            <div className="d8-below-card">
+              <div className="d8-below-head">Option C</div>
+              <div className="d8-below-body">SiteGround-style structure</div>
+            </div>
+            <div className="d8-below-card">
+              <div className="d8-below-head">V7b</div>
+              <div className="d8-below-body">True cursor-follow glow (tiny JS)</div>
             </div>
           </div>
         </div>
       </section>
-
-      {/* CONTENT BELOW THE FOLD (placeholder - keep simple for now) */}
-      <section className="mx-auto max-w-6xl px-6 pb-16">
-        <div className="rounded-3xl bg-white/80 p-6 ring-1 ring-slate-200 shadow-sm">
-          <div className="text-xs font-semibold text-slate-500">Below the fold</div>
-          <div className="mt-2 text-2xl font-semibold text-slate-950">This is where sections begin after scroll</div>
-          <div className="mt-2 text-sm text-slate-700 max-w-2xl">
-            Next we can add the “3 real examples” grid, how-it-works, or pricing preview — but your hero is now a full-screen WOW takeover.
-          </div>
-        </div>
-      </section>
-
-      <Footer />
     </main>
   );
 }

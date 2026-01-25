@@ -1,2 +1,3 @@
-﻿export const BUILD_MARKER = "D8_BUILD_2026-01-25T17-50-19Z";
-export const MONSTER_MARKER = "D8_HERO_WOW_BG_V6_2026-01-25T04-50-18Z";
+﻿export function buildMarker() {
+  return "D8_HERO_CURSOR_GLOW_V7_2026-01-25";
+}
