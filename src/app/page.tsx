@@ -1,10 +1,12 @@
 ﻿export default function HomePage() {
-  const marker = "HERO_WOW_V1_2_GOLD_OK_20260125_153352";
+  const marker = "HERO_WOW_V1_2_GOLD_OK_20260125_154541";
+  const buildId = "BUILD_ID_20260125_154541";
 
   return (
     <main className="d8-root">
-<div style={{position:'absolute',left:-9999,top:-9999}}>BUILD_ID_20260125_154005</div>
+      {/* Hidden markers for verification */}
       <div className="d8-hidden">{marker}</div>
+      <div className="d8-hidden">{buildId}</div>
 
       <section className="d8-hero">
         {/* Background */}
@@ -15,7 +17,7 @@
         <div className="d8-halo d8-haloMain" aria-hidden="true" />
         <div className="d8-halo d8-haloSide" aria-hidden="true" />
 
-        {/* NEW: Golden “signal rain” (champagne + warm gold) */}
+        {/* Golden “signal rain” */}
         <div className="d8-gold" aria-hidden="true">
           {Array.from({ length: 12 }).map((_, i) => (
             <span className="d8-goldDrop" key={i} />
@@ -80,7 +82,7 @@
       </section>
 
       <section className="d8-footer">
-        <small>Marker: {marker}</small>
+        <small>Marker: {marker} • Build: {buildId}</small>
       </section>
 
       <style>{\
@@ -94,7 +96,6 @@
         }
         .d8-hidden{ position:absolute; left:-9999px; top:-9999px; }
 
-        /* Hero layout */
         .d8-hero{
           position:relative;
           min-height:92vh;
@@ -103,8 +104,6 @@
           justify-content:center;
           padding:96px 20px 72px;
         }
-
-        /* Slight left bias */
         .d8-shell{
           position:relative;
           width:min(1120px, 100%);
@@ -115,7 +114,6 @@
           .d8-shell{ transform:none; }
         }
 
-        /* Background base */
         .d8-bg{ position:absolute; inset:0; z-index:0; }
         .d8-bgBase{
           background-image:url('/hero/hero-bg.svg');
@@ -131,7 +129,6 @@
           z-index:1;
         }
 
-        /* Premium halo glows */
         .d8-halo{
           position:absolute;
           z-index:2;
@@ -163,12 +160,11 @@
           .d8-haloSide{ display:none; }
         }
 
-        /* NEW: Golden Signal Rain */
         .d8-gold{
           position:absolute;
           left:0; right:0;
           top:0;
-          height: 52vh;          /* only above hero / never over cards */
+          height: 52vh;
           z-index:2;
           pointer-events:none;
           overflow:hidden;
@@ -188,8 +184,8 @@
             linear-gradient(
               to bottom,
               rgba(255, 244, 220, 0),
-              rgba(255, 236, 205, 0.22),   /* champagne */
-              rgba(255, 214, 160, 0.20),   /* warm gold */
+              rgba(255, 236, 205, 0.22),
+              rgba(255, 214, 160, 0.20),
               rgba(255, 244, 220, 0)
             );
           filter: blur(0.2px);
@@ -200,7 +196,6 @@
           opacity: 0.75;
         }
 
-        /* Positioning + timing (fixed but varied) */
         .d8-goldDrop:nth-child(1)  { left: 10%; animation-duration: 10.5s; animation-delay: -1.2s; opacity: 0.40; transform: rotate(2deg); }
         .d8-goldDrop:nth-child(2)  { left: 18%; animation-duration:  9.2s; animation-delay: -6.0s; opacity: 0.55; transform: rotate(-2deg); }
         .d8-goldDrop:nth-child(3)  { left: 26%; animation-duration: 11.8s; animation-delay: -3.4s; opacity: 0.42; transform: rotate(1deg); }
@@ -219,7 +214,6 @@
           100% { transform: translate3d(0, 78vh, 0); }
         }
 
-        /* Grain */
         .d8-grain{
           position:absolute;
           inset:0;
@@ -232,7 +226,6 @@
           mix-blend-mode: overlay;
         }
 
-        /* Badge */
         .d8-badge{
           display:inline-flex;
           align-items:center;
@@ -266,7 +259,6 @@
           opacity:0.9;
         }
 
-        /* Headline */
         .d8-h1{
           font-size:clamp(2.7rem, 5.0vw, 4.35rem);
           line-height:1.03;
@@ -274,14 +266,8 @@
           margin:0 0 16px;
           text-shadow: 0 18px 70px rgba(0,0,0,0.70);
         }
-        .d8-strong{
-          font-weight: 950;
-          letter-spacing: -1.35px;
-        }
-        .d8-h1Lite{
-          font-weight: 650;
-          opacity: 0.96;
-        }
+        .d8-strong{ font-weight: 950; letter-spacing: -1.35px; }
+        .d8-h1Lite{ font-weight: 650; opacity: 0.96; }
         .d8-gradText{
           background: linear-gradient(135deg, rgba(124,92,255,1), rgba(77,210,255,1));
           -webkit-background-clip:text;
@@ -296,7 +282,6 @@
           margin:0 0 26px;
         }
 
-        /* CTA */
         .d8-ctaRow{
           display:flex;
           gap:12px;
@@ -338,7 +323,6 @@
           box-shadow: 0 18px 70px rgba(0,0,0,0.55);
         }
 
-        /* Proof block */
         .d8-proof{
           margin-left: 6px;
           padding: 10px 12px;
@@ -351,7 +335,6 @@
         .d8-proofTop{ font-weight:900; opacity:0.95; margin-bottom:2px; }
         .d8-proofSub{ font-size:13px; opacity:0.72; line-height:1.35; }
 
-        /* Cards */
         .d8-cards{
           margin-top:22px;
           display:grid;
@@ -370,7 +353,6 @@
         .d8-cardTitle{ font-weight:900; margin-bottom:6px; letter-spacing:-0.2px; }
         .d8-cardBody{ opacity:0.78; font-size:14px; line-height:1.45; }
 
-        /* Bottom fade */
         .d8-bottomFade{
           position:absolute;
           left:0; right:0; bottom:-1px;
@@ -380,14 +362,12 @@
           pointer-events:none;
         }
 
-        /* Footer */
         .d8-footer{
           padding: 22px 20px 46px;
           opacity:0.65;
           text-align:center;
         }
 
-        /* Motion: keep tasteful */
         .d8-enter{ animation: d8Enter 680ms cubic-bezier(.2,.8,.2,1) both; }
         .d8-delay1{ animation-delay: 80ms; }
         .d8-delay2{ animation-delay: 150ms; }
@@ -412,5 +392,3 @@
     </main>
   );
 }
-
-
