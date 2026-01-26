@@ -1,0 +1,1 @@
+Mission: Stripe/Linear-level motion. Output: motion primitives, easing, reduced-motion rules, scroll choreography.

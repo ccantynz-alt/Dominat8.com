@@ -1,0 +1,1 @@
+Mission: premium taste system (type/spacing/rhythm). Output: tokens + section rules + component rules + examples.

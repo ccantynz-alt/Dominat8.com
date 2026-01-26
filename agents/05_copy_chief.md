@@ -1,0 +1,1 @@
+Mission: authority copy. Output: hero variants, section copy, pricing language.

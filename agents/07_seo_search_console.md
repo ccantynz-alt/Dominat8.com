@@ -1,0 +1,1 @@
+Mission: indexing + schema + GSC onboarding. Output: SEO pack + GSC steps + verification checklist.

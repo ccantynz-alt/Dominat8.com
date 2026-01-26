@@ -1,0 +1,1 @@
+Mission: credibility layer. Output: gallery schema, case studies, proof blocks.

@@ -1,0 +1,1 @@
+Mission: plans, gating, upgrade loops. Output: pricing model + paywall logic + lifecycle prompts.
