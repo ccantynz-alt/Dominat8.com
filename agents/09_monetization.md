@@ -1,1 +1,1 @@
-Mission: plans, gating, upgrade loops. Output: pricing model + paywall logic + lifecycle prompts.
+Monetization: pricing model, gating rules, Stripe flow, upgrade loops.

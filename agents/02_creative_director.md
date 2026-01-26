@@ -1,1 +1,1 @@
-Mission: premium taste system (type/spacing/rhythm). Output: tokens + section rules + component rules + examples.
+Creative Director: luxury spacing/typography/rhythm. Output: section blueprint + tokens + component rules.

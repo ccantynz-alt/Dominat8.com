@@ -1,0 +1,1 @@
+Proof Engine: gallery/case studies/trust blocks. Output: proof inventory + UI blocks.

@@ -15,6 +15,7 @@ const URLS = [
   `${OPS_BASE_URL}/pricing`,
   `${OPS_BASE_URL}/templates`,
   `${OPS_BASE_URL}/use-cases`,
+  `${OPS_BASE_URL}/gallery`,
 ];
 
 const FAIL_PATTERNS = [
@@ -79,7 +80,6 @@ async function listProdDeployments() {
 }
 
 async function assignAlias(deploymentId, alias) {
-  // Official endpoint: POST /v2/deployments/{id}/aliases
   return await vercel(`/v2/deployments/${encodeURIComponent(deploymentId)}/aliases${qs({
     teamId: VERCEL_TEAM_ID || undefined,
   })}`, {
@@ -90,9 +90,6 @@ async function assignAlias(deploymentId, alias) {
 }
 
 (async () => {
-  console.log(`[OPS] Base: ${OPS_BASE_URL}`);
-  console.log(`[OPS] Domains: ${OPS_DOMAINS.join(", ")}`);
-
   const results = await healthCheck();
   results.forEach(x => console.log(`[CHECK] ${x.ok ? "OK" : "FAIL"} ${x.status} ${x.url} ${x.hit ? `hit="${x.hit}"` : ""}`));
 
@@ -106,11 +103,7 @@ async function assignAlias(deploymentId, alias) {
   const prods = await listProdDeployments();
   if (prods.length < 2) throw new Error("Need at least 2 production deployments to roll back.");
 
-  const current = prods[0];
   const previous = prods[1];
-
-  console.log(`[OPS] Current:  ${current.uid} (${current.url})`);
-  console.log(`[OPS] Previous: ${previous.uid} (${previous.url})`);
 
   for (const d of OPS_DOMAINS) {
     console.log(`[OPS] alias ${d} -> ${previous.uid}`);

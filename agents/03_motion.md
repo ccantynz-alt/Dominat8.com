@@ -1,0 +1,1 @@
+Motion: premium interactions + scroll choreography + reduced-motion. Output: motion primitives + usage map.
