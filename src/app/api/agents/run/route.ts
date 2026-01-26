@@ -1,98 +1,114 @@
-import { NextResponse } from "next/server";
-import { promises as fs } from "node:fs";
-import path from "node:path";
+﻿import { NextResponse } from "next/server";
+import { promises as fs } from "fs";
+import path from "path";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type RunReq = {
-  agentId: string;              // e.g. "02_creative_director" or "02_creative_director.md"
-  projectId?: string;
-  input?: unknown;
-};
-
-function normalizeAgentId(agentId: string): string {
-  const a = (agentId || "").trim();
-  if (!a) return "";
-  // strip any directory traversal + normalize extension
-  const base = path.basename(a);
-  return base.toLowerCase().endsWith(".md") ? base : `${base}.md`;
+function stamp() {
+  const d = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `AGENT_RUNNER_OK_${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}_${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}`;
 }
 
-async function readAgentMarkdown(agentFile: string): Promise<{ ok: boolean; file?: string; markdown?: string; error?: string }> {
+function isSafeAgentId(agentId: string) {
+  // allow: letters/numbers/_/-
+  return /^[a-zA-Z0-9_-]+$/.test(agentId);
+}
+
+async function loadPromptMarkdown(agentId: string) {
+  if (!isSafeAgentId(agentId)) {
+    return { ok: false as const, status: 400, error: "Invalid agentId (allowed: letters, numbers, _ and -)." };
+  }
+
+  const agentsDir = path.join(process.cwd(), "agents");
+  const mdPath = path.join(agentsDir, `${agentId}.md`);
+
   try {
-    const agentsDir = path.join(process.cwd(), "agents");
-    const full = path.join(agentsDir, agentFile);
-    const md = await fs.readFile(full, "utf8");
-    return { ok: true, file: agentFile, markdown: md };
+    const promptMarkdown = await fs.readFile(mdPath, "utf8");
+    return { ok: true as const, promptMarkdown, mdPath };
   } catch (e: any) {
-    return { ok: false, error: e?.message || "Failed to read agent file" };
+    const code = e?.code || "READ_FAIL";
+    if (code === "ENOENT") {
+      return { ok: false as const, status: 404, error: `Agent prompt not found: agents/${agentId}.md`, mdPath };
+    }
+    return { ok: false as const, status: 500, error: `Failed to read agent prompt (${code}).`, mdPath };
   }
 }
 
-export async function GET() {
-  return NextResponse.json({
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const agentId = url.searchParams.get("agentId") || undefined;
+
+  const base = {
     ok: true,
-    service: "agents-runner",
     mode: "dry-run",
-    routes: {
-      run: { method: "POST", path: "/api/agents/run" }
-    },
-    hint: "POST JSON: { agentId, projectId?, input? }",
-    stamp: `AGENT_RUNNER_OK_${new Date().toISOString()}`
-  });
-}
+    stamp: stamp(),
+    hint: "POST with {agentId, projectId, input} to load /agents/<agentId>.md (dry-run only).",
+    now: new Date().toISOString(),
+  };
 
-export async function POST(req: Request) {
-  let body: RunReq | null = null;
-
-  try {
-    body = (await req.json()) as RunReq;
-  } catch {
-    return NextResponse.json({ ok: false, error: "Invalid JSON body" }, { status: 400 });
+  if (!agentId) {
+    return NextResponse.json(base, { status: 200, headers: { "Cache-Control": "no-store" } });
   }
 
-  const agentFile = normalizeAgentId(body?.agentId || "");
-  if (!agentFile) {
-    return NextResponse.json({ ok: false, error: "Missing agentId" }, { status: 400 });
-  }
-
-  const agent = await readAgentMarkdown(agentFile);
-  if (!agent.ok) {
+  const loaded = await loadPromptMarkdown(agentId);
+  if (!loaded.ok) {
     return NextResponse.json(
-      {
-        ok: false,
-        error: "Agent file not found/readable",
-        details: agent.error,
-        expectedPath: `agents/${agentFile}`
-      },
-      { status: 404 }
+      { ok: false, mode: "dry-run", stamp: stamp(), agentId, error: loaded.error, mdPath: loaded.mdPath },
+      { status: loaded.status, headers: { "Cache-Control": "no-store" } }
     );
   }
 
-  // DRY-RUN: we are not calling an LLM yet.
-  // This endpoint proves wiring: load agent prompt + return a structured “would-run” payload.
-  const runId = `run_${Date.now()}`;
+  return NextResponse.json(
+    { ...base, agentId, mdPath: loaded.mdPath, promptMarkdown: loaded.promptMarkdown },
+    { status: 200, headers: { "Cache-Control": "no-store" } }
+  );
+}
 
-  const response = {
-    ok: true,
-    mode: "dry-run",
-    runId,
-    projectId: body?.projectId || null,
-    agentId: body?.agentId || null,
-    agentFile: agent.file,
-    promptMarkdown: agent.markdown,
-    input: body?.input ?? null,
-    result: {
-      summary: "DRY_RUN_ONLY — LLM execution not enabled yet. Next step: add provider key + call model.",
-      next: [
-        "Add OPENAI_API_KEY (or your LLM provider key) to Vercel env + local env",
-        "Implement model call in /api/agents/run",
-        "Persist outputs to KV (agent:<projectId>:<agentId>:latest)"
-      ]
+export async function POST(req: Request) {
+  let body: any = null;
+
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { ok: false, mode: "dry-run", stamp: stamp(), error: "Invalid JSON body." },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
+  const agentId = String(body?.agentId || "");
+  const projectId = String(body?.projectId || "");
+  const input = body?.input ?? null;
+
+  if (!agentId) {
+    return NextResponse.json(
+      { ok: false, mode: "dry-run", stamp: stamp(), error: "Missing agentId." },
+      { status: 400, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
+  const loaded = await loadPromptMarkdown(agentId);
+  if (!loaded.ok) {
+    return NextResponse.json(
+      { ok: false, mode: "dry-run", stamp: stamp(), agentId, projectId, error: loaded.error, mdPath: loaded.mdPath },
+      { status: loaded.status, headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
+  return NextResponse.json(
+    {
+      ok: true,
+      mode: "dry-run",
+      stamp: stamp(),
+      agentId,
+      projectId,
+      input,
+      mdPath: loaded.mdPath,
+      promptMarkdown: loaded.promptMarkdown,
+      next: "Wire LLM execution + KV persistence in Install A+ (real run).",
     },
-    stamp: `AGENT_RUNNER_DRY_${new Date().toISOString()}`
-  };
-
-  return NextResponse.json(response, { status: 200 });
+    { status: 200, headers: { "Cache-Control": "no-store" } }
+  );
 }
