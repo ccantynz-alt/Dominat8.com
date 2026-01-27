@@ -225,3 +225,111 @@ main{
 }
 
 /* D8_PHASE1_LOCK_DEPLOY_STYLING_v1_20260128 - phase 1 anchor */
+
+/* D8_PHASE1_5_GLOBAL_POLISH_v1_20260128 */
+:root{
+  --d8-radius: 16px;
+  --d8-radius-lg: 20px;
+  --d8-border: rgba(255,255,255,.12);
+  --d8-border2: rgba(255,255,255,.10);
+  --d8-card: rgba(255,255,255,.06);
+  --d8-card2: rgba(255,255,255,.04);
+  --d8-text: rgba(237,234,247,.92);
+  --d8-muted: rgba(237,234,247,.72);
+  --d8-muted2: rgba(237,234,247,.58);
+  --d8-shadow: 0 30px 90px rgba(0,0,0,.45);
+  --d8-shadow-soft: 0 18px 55px rgba(0,0,0,.35);
+}
+
+*{ box-sizing:border-box }
+html,body{ height:100% }
+body{
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.d8-app-shell{ width:100% }
+.d8-app-main{ width:100% }
+.d8-page{
+  width:100%;
+  max-width: 1160px;
+  margin-left:auto;
+  margin-right:auto;
+  padding: 18px 16px 44px;
+}
+@media (min-width: 980px){
+  .d8-page{ padding: 26px 18px 56px; }
+}
+
+/* Surfaces – makes every page feel intentional without changing layout */
+.d8-surface{
+  border-radius: var(--d8-radius-lg);
+  border: 1px solid var(--d8-border);
+  background: linear-gradient(180deg, var(--d8-card), var(--d8-card2));
+  box-shadow: var(--d8-shadow-soft);
+}
+
+/* Universal typography defaults */
+h1,h2,h3,h4{ color: rgba(246,242,255,.96); letter-spacing: -0.01em }
+p,li{ color: var(--d8-muted); line-height: 1.65 }
+small{ color: var(--d8-muted2) }
+
+/* Links */
+a{ color: rgba(200,180,255,.95) }
+a:hover{ color: rgba(220,220,255,.98) }
+
+/* Buttons */
+button, .btn, a.btn{
+  border-radius: 14px;
+  border: 1px solid var(--d8-border2);
+  background: rgba(255,255,255,.05);
+  color: rgba(237,234,247,.92);
+  padding: 10px 14px;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease, filter .12s ease;
+}
+button:hover, .btn:hover, a.btn:hover{
+  background: rgba(255,255,255,.08);
+  transform: translateY(-1px);
+}
+button:active, .btn:active, a.btn:active{
+  transform: translateY(0px);
+}
+
+/* Inputs */
+input,select,textarea{
+  border-radius: 14px;
+  border: 1px solid var(--d8-border2);
+  background: rgba(0,0,0,.28);
+  color: rgba(237,234,247,.92);
+  padding: 10px 12px;
+  outline: none;
+}
+input:focus,select:focus,textarea:focus{
+  border-color: rgba(168,85,247,.55);
+  box-shadow: 0 0 0 4px rgba(168,85,247,.15);
+}
+::placeholder{ color: rgba(237,234,247,.45) }
+
+/* Tables */
+table{ width:100%; border-collapse: collapse }
+th,td{
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  padding: 10px 10px;
+  text-align:left;
+}
+th{
+  color: rgba(237,234,247,.70);
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+/* Admin/Cockpit helpers (no redesign, just polish) */
+code, pre{
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.35);
+  color: rgba(237,234,247,.88);
+}
