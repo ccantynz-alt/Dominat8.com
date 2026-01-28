@@ -1,0 +1,9 @@
+DOMINAT8 ENGINE â€” PROOF 006
+================================
+STAMP: ENGINE_INSTALL_006_STAMP_2026-01-28_NZ
+WHEN:  2026-01-28T04:04:36.7970559Z
+WHERE: public\engine_proofs\engine_proof_006.txt
+
+Expected companion code:
+- src\lib\engine\engineInstall006.ts
+- src\lib\engine\engineProof005.ts (marker: ENGINE_INSTALL_006_APPENDED_BLOCK)

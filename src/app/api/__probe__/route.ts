@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getEngineProbeStamp } from "@/lib/engine/probeStamp";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -16,6 +17,8 @@ export async function GET(req: Request) {
   const now = new Date();
   const rand = Math.random().toString(16).slice(2);
 
+  const engine = getEngineProbeStamp();
+
   const payload = {
     ok: true,
     probe: "dominat8",
@@ -23,6 +26,7 @@ export async function GET(req: Request) {
     serverTimeMs: now.getTime(),
     rand,
     ts,
+    engine,
     env: {
       VERCEL: pickEnv("VERCEL"),
       VERCEL_ENV: pickEnv("VERCEL_ENV"),
@@ -55,6 +59,10 @@ export async function GET(req: Request) {
   if (payload.env.VERCEL_DEPLOYMENT_ID) res.headers.set("x-dominat8-deploy", payload.env.VERCEL_DEPLOYMENT_ID);
   if (payload.env.VERCEL_GIT_COMMIT_SHA) res.headers.set("x-dominat8-git", payload.env.VERCEL_GIT_COMMIT_SHA);
   if (payload.env.VERCEL_ENV) res.headers.set("x-dominat8-env", payload.env.VERCEL_ENV);
+
+  // Engine headers (INSTALL 006.1):
+  res.headers.set("x-dominat8-engine-install", engine.install);
+  res.headers.set("x-dominat8-engine-stamp", engine.stamp);
 
   return res;
 }
