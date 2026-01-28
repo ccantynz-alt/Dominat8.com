@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { d8 } from "@/lib/ui/d8InlineUi";
 import type { D8Storyboard, D8VideoShot } from "@/lib/video/d8VideoTypes";
 
-type RecState = "idle" | "ready" | "recording" | "done" | "error";
+type RecState = "idle" | "ready" | "recording" | "done" | "publishing" | "error";
 
 function nowStamp() {
   const d = new Date();
@@ -21,6 +21,8 @@ export default function VideoStudioClient() {
 
   const [topic, setTopic] = useState("How Dominat8 Works");
   const [seconds, setSeconds] = useState(35);
+  const [projectId, setProjectId] = useState("demo");
+
   const [status, setStatus] = useState<RecState>("idle");
   const [err, setErr] = useState<string | null>(null);
 
@@ -59,11 +61,8 @@ export default function VideoStudioClient() {
   }
 
   function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, shot: D8VideoShot, t: number) {
-    // t: 0..1 progress through shot
-    // Background
     ctx.clearRect(0, 0, w, h);
 
-    // Rich-but-stable gradient (inline)
     const g = ctx.createLinearGradient(0, 0, w, h);
     g.addColorStop(0, "rgba(14, 10, 22, 1)");
     g.addColorStop(0.5, "rgba(10, 8, 16, 1)");
@@ -71,7 +70,6 @@ export default function VideoStudioClient() {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, w, h);
 
-    // Glow blobs
     const glow1 = ctx.createRadialGradient(w*0.22, h*0.2, 10, w*0.22, h*0.2, w*0.6);
     glow1.addColorStop(0, "rgba(125,90,255,0.22)");
     glow1.addColorStop(1, "rgba(125,90,255,0)");
@@ -84,14 +82,12 @@ export default function VideoStudioClient() {
     ctx.fillStyle = glow2;
     ctx.fillRect(0, 0, w, h);
 
-    // Card
     const pad = Math.round(w * 0.08);
     const cardX = pad;
     const cardY = Math.round(h * 0.18);
     const cardW = w - pad*2;
     const cardH = Math.round(h * 0.56);
 
-    // Subtle zoom/pulse
     const pulse = 1 + 0.01 * Math.sin(t * Math.PI * 2);
     const cx = w/2, cy = h/2;
     ctx.save();
@@ -99,7 +95,6 @@ export default function VideoStudioClient() {
     ctx.scale(pulse, pulse);
     ctx.translate(-cx, -cy);
 
-    // Rounded rect card
     const r = 18;
     ctx.beginPath();
     ctx.moveTo(cardX + r, cardY);
@@ -115,20 +110,16 @@ export default function VideoStudioClient() {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Title
     ctx.fillStyle = "rgba(246,242,255,0.95)";
     ctx.font = "900 34px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
     ctx.textBaseline = "top";
-
     const titleY = cardY + 28;
     ctx.fillText("Dominat8", cardX + 28, titleY);
 
-    // Shot title
     ctx.fillStyle = "rgba(237,234,247,0.75)";
     ctx.font = "800 18px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
     ctx.fillText(shot.title, cardX + 28, titleY + 46);
 
-    // Lines (animate in)
     const baseY = titleY + 92;
     const lines = shot.lines || [];
     for (let i = 0; i < lines.length; i++) {
@@ -141,7 +132,6 @@ export default function VideoStudioClient() {
     }
     ctx.globalAlpha = 1;
 
-    // Progress bar
     const barW = cardW - 56;
     const barX = cardX + 28;
     const barY = cardY + cardH - 34;
@@ -152,7 +142,6 @@ export default function VideoStudioClient() {
 
     ctx.restore();
 
-    // Footer
     ctx.fillStyle = "rgba(237,234,247,0.55)";
     ctx.font = "700 14px ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial";
     ctx.fillText("AI Auto Video Studio (D8)", pad, h - 28);
@@ -176,9 +165,7 @@ export default function VideoStudioClient() {
       return;
     }
 
-    // Timeline
     const durations = shots.map(s => Math.max(2, Math.min(12, Math.floor(s.durationSec || 6))));
-    const total = durations.reduce((a, b) => a + b, 0);
     let t0 = performance.now();
 
     function tick() {
@@ -190,7 +177,6 @@ export default function VideoStudioClient() {
         idx++;
       }
       if (idx >= durations.length) {
-        // done
         setActiveIndex(durations.length - 1);
         drawFrame(ctx, w, h, shots[durations.length - 1], 1);
         stopAnimation();
@@ -219,18 +205,11 @@ export default function VideoStudioClient() {
     }
 
     const canvas = canvasRef.current;
-
-    // Capture canvas stream (no audio by default)
     const stream = canvas.captureStream(30);
     streamRef.current = stream;
 
     let options: MediaRecorderOptions = {};
-    // Try common mime types (browser dependent)
-    const prefers = [
-      "video/webm;codecs=vp9",
-      "video/webm;codecs=vp8",
-      "video/webm",
-    ];
+    const prefers = ["video/webm;codecs=vp9", "video/webm;codecs=vp8", "video/webm"];
     for (const m of prefers) {
       if ((window as any).MediaRecorder && (MediaRecorder as any).isTypeSupported?.(m)) {
         options.mimeType = m;
@@ -242,8 +221,8 @@ export default function VideoStudioClient() {
     let recorder: MediaRecorder;
     try {
       recorder = new MediaRecorder(stream, options);
-    } catch (e: any) {
-      setErr("MediaRecorder failed to initialize. Try Chrome/Edge.");
+    } catch {
+      setErr("MediaRecorder failed. Try Chrome/Edge.");
       setStatus("error");
       return;
     }
@@ -259,17 +238,14 @@ export default function VideoStudioClient() {
       const url = URL.createObjectURL(blob);
       setDownloadUrl(url);
       setStatus("done");
-      // stop tracks
       stream.getTracks().forEach(t => t.stop());
     };
 
     setStatus("recording");
     recorder.start(250);
 
-    // Start animation playback aligned with recording
     playStoryboard(false);
 
-    // Stop recording after timeline ends (+ small buffer)
     const totalSec = shots.reduce((a, s) => a + Math.max(2, Math.min(12, Math.floor(s.durationSec || 6))), 0);
     window.setTimeout(() => {
       try { recorder.stop(); } catch {}
@@ -280,14 +256,56 @@ export default function VideoStudioClient() {
     try { recRef.current?.stop(); } catch {}
   }
 
+  async function publishToProject() {
+    setErr(null);
+
+    const pid = (projectId || "").trim();
+    if (!pid) {
+      setErr("Project ID is required.");
+      setStatus("error");
+      return;
+    }
+    if (!downloadUrl) {
+      setErr("Record a video first (Download link must exist).");
+      setStatus("error");
+      return;
+    }
+
+    setStatus("publishing");
+
+    try {
+      const b = await fetch(downloadUrl).then(r => r.blob());
+      const file = new File([b], `dominat8_${nowStamp()}.webm`, { type: "video/webm" });
+
+      const form = new FormData();
+      form.append("projectId", pid);
+      form.append("file", file);
+
+      const r = await fetch("/api/video/publish", { method: "POST", body: form });
+      const j = await r.json().catch(() => ({}));
+
+      if (!j?.ok) {
+        setErr(j?.error || "Publish failed.");
+        setStatus("error");
+        return;
+      }
+
+      // Success: show link to project embed page
+      setStatus("done");
+      const url = `/projects/${encodeURIComponent(pid)}/video`;
+      alert(`Published! Project video page:\n${url}`);
+    } catch (e: any) {
+      setErr(String(e?.message || e));
+      setStatus("error");
+    }
+  }
+
   useEffect(() => {
-    // Setup fixed canvas size for consistent capture
     const c = canvasRef.current;
     if (!c) return;
     c.width = 1280;
     c.height = 720;
 
-    // draw idle frame
     const ctx = c.getContext("2d");
     if (!ctx) return;
     drawFrame(ctx, c.width, c.height, { id: "idle", title: "Ready", durationSec: 6, lines: ["Generate a storyboard.", "Preview.", "Record."] }, 0.2);
@@ -307,40 +325,25 @@ export default function VideoStudioClient() {
           <div style={{ flex: "1 1 420px" }}>
             <h1 style={d8.h1}>AI Auto Video Studio</h1>
             <p style={d8.p}>
-              Generate a short “How it works” explainer for Dominat8, preview it, then record it as a downloadable video.
-              (This is a new page only: <b>/video</b>. Existing pages are unchanged.)
+              Generate → Preview → Record → <b>Publish to Project</b> (stores the latest video URL in KV and auto-embeds on the project video page).
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: 10, flex: "0 0 auto" }}>
-            <button
-              onClick={generateStoryboard}
-              style={d8.btnHot}
-              title="Create a storyboard (uses OPENAI_API_KEY if present, fallback if not)"
-            >
+          <div style={{ display: "flex", gap: 10, flex: "0 0 auto", flexWrap: "wrap" }}>
+            <button onClick={generateStoryboard} style={d8.btnHot} title="Create a storyboard">
               Generate Storyboard
             </button>
 
-            <button
-              onClick={() => playStoryboard(true)}
-              style={d8.btn}
-              disabled={status === "recording" || !shots.length}
-              title="Preview the storyboard animation"
-            >
+            <button onClick={() => playStoryboard(true)} style={d8.btn} disabled={status === "recording" || !shots.length}>
               Preview
             </button>
 
             {status !== "recording" ? (
-              <button
-                onClick={startRecording}
-                style={d8.btn}
-                disabled={!shots.length}
-                title="Record the canvas as a video"
-              >
+              <button onClick={startRecording} style={d8.btn} disabled={!shots.length}>
                 Record
               </button>
             ) : (
-              <button onClick={stopRecording} style={d8.btn} title="Stop recording early">
+              <button onClick={stopRecording} style={d8.btn}>
                 Stop
               </button>
             )}
@@ -352,23 +355,17 @@ export default function VideoStudioClient() {
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <div style={{ flex: "1 1 320px" }}>
                 <label style={{ fontSize: 12, color: "rgba(237,234,247,0.60)", fontWeight: 800 }}>Topic</label>
-                <input
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  style={d8.input}
-                  placeholder="How Dominat8 Works"
-                />
+                <input value={topic} onChange={(e) => setTopic(e.target.value)} style={d8.input} />
               </div>
+
               <div style={{ width: 160 }}>
                 <label style={{ fontSize: 12, color: "rgba(237,234,247,0.60)", fontWeight: 800 }}>Seconds</label>
-                <input
-                  value={seconds}
-                  onChange={(e) => setSeconds(Number(e.target.value || 35))}
-                  style={d8.input}
-                  type="number"
-                  min={15}
-                  max={90}
-                />
+                <input value={seconds} onChange={(e) => setSeconds(Number(e.target.value || 35))} style={d8.input} type="number" min={15} max={90} />
+              </div>
+
+              <div style={{ width: 220 }}>
+                <label style={{ fontSize: 12, color: "rgba(237,234,247,0.60)", fontWeight: 800 }}>Project ID</label>
+                <input value={projectId} onChange={(e) => setProjectId(e.target.value)} style={d8.input} placeholder="demo" />
               </div>
             </div>
 
@@ -389,44 +386,44 @@ export default function VideoStudioClient() {
               <div style={{ fontSize: 12, color: "rgba(237,234,247,0.62)", fontWeight: 800 }}>
                 Status: <span style={{ color: "rgba(246,242,255,0.92)" }}>{status}</span>
               </div>
-              {storyboard?.mode && (
-                <div style={{ fontSize: 12, color: "rgba(237,234,247,0.62)", fontWeight: 800 }}>
-                  Mode: <span style={{ color: "rgba(246,242,255,0.92)" }}>{storyboard.mode}</span>
-                </div>
-              )}
+
               {err && <div style={{ fontSize: 12, color: "rgba(255,140,140,0.92)", fontWeight: 900 }}>{err}</div>}
+
               {downloadUrl && (
                 <a
                   href={downloadUrl}
                   download={`dominat8_video_${nowStamp()}.webm`}
-                  style={{
-                    ...d8.btnHot,
-                    textDecoration: "none",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: 8,
-                  }}
+                  style={{ ...d8.btn, textDecoration: "none", fontWeight: 950 }}
                 >
-                  Download Video (.webm)
+                  Download .webm
                 </a>
               )}
+
+              <button
+                onClick={publishToProject}
+                style={d8.btnHot}
+                disabled={!downloadUrl || status === "recording" || status === "publishing"}
+                title="Uploads to Vercel Blob, stores URL in KV, and enables /projects/{projectId}/video embed"
+              >
+                {status === "publishing" ? "Publishing..." : "Publish to Project"}
+              </button>
+
+              <a
+                href={`/projects/${encodeURIComponent((projectId || "demo").trim())}/video`}
+                style={{ ...d8.btn, textDecoration: "none", fontWeight: 950 }}
+                title="Open the project video page (auto-embed)"
+              >
+                Open Project Video Page
+              </a>
             </div>
           </div>
 
           <div style={d8.card}>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
-              <div style={{ fontWeight: 950, fontSize: 14 }}>Storyboard</div>
-              {storyboard?.createdAtIso && (
-                <div style={{ fontSize: 11, color: "rgba(237,234,247,0.55)", fontWeight: 800 }}>
-                  {new Date(storyboard.createdAtIso).toLocaleString()}
-                </div>
-              )}
-            </div>
+            <div style={{ fontWeight: 950, fontSize: 14 }}>Storyboard</div>
 
             {!storyboard && (
               <p style={d8.p}>
-                Click <b>Generate Storyboard</b>. If you have <b>OPENAI_API_KEY</b> set on Vercel, it uses AI.
-                Otherwise it uses a safe fallback storyboard.
+                Click <b>Generate Storyboard</b>, then <b>Record</b>. After recording, click <b>Publish to Project</b>.
               </p>
             )}
 
@@ -472,11 +469,11 @@ export default function VideoStudioClient() {
                 )}
               </div>
             )}
-          </div>
-        </div>
 
-        <div style={{ marginTop: 12, fontSize: 12, color: "rgba(237,234,247,0.58)", fontWeight: 800 }}>
-          Tip: If you want AI storyboards, set <b>OPENAI_API_KEY</b> on Vercel (server-side). This page never exposes keys.
+            <div style={{ marginTop: 12, fontSize: 12, color: "rgba(237,234,247,0.58)", fontWeight: 800 }}>
+              Publish requires: <b>BLOB_READ_WRITE_TOKEN</b> on Vercel + KV env already set.
+            </div>
+          </div>
         </div>
       </div>
     </div>
