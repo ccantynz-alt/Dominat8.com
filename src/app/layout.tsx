@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import DxlAtmosphere from "@/components/dxl/DxlAtmosphere";
 import DxlStatusPill from "@/components/dxl/DxlStatusPill";
 import DxlWorldPulseSync from "@/components/dxl/DxlWorldPulseSync";
+import DxlToasts from "@/components/dxl/DxlToasts";
 
 export const metadata: Metadata = {
   title: "Dominat8",
@@ -149,6 +150,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       {process.env.DXL_STATUS_PILL === "0" ? null : <DxlStatusPill />}
 
       <DxlWorldPulseSync />
+
+      {process.env.DXL_TOASTS === "0" ? null : <DxlToasts />}
 </div>
     </body>
     </html>

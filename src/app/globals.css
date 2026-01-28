@@ -1,341 +1,251 @@
 /* =========================================================
-   DXL-04 System Awareness Cues (DXL04_20260128)
-   - A tiny, tasteful Ã¢â‚¬Å“system readyÃ¢â‚¬Â status pill
-   - Non-invasive: fixed overlay
-   - Can be disabled via env: DXL_STATUS_PILL=0
+   DXL-07 Live Optimization Toasts (DXL07_20260128)
+   - Ultra subtle, premium notifications
+   - Kill switch: DXL_TOASTS=0
    ========================================================= */
 
-html[data-dxl="DXL01_20260128"] .dxl-pill {
+html[data-dxl="DXL01_20260128"] .dxl-toasts {
   position: fixed;
-  left: 14px;
+  right: 14px;
   bottom: 14px;
-  z-index: 50;
+  z-index: 60;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
-  max-width: 420px;
+  align-items: flex-end;
+  pointer-events: none; /* toasts are not interactive */
+}
 
-  padding: 10px 12px;
+html[data-dxl="DXL01_20260128"] .dxl-toasts__hide {
+  pointer-events: auto;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 900;
+
+  padding: 8px 10px;
   border-radius: 999px;
 
   background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.14);
-  box-shadow: 0 18px 55px rgba(0,0,0,0.48);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(246,242,255,0.70);
 
   backdrop-filter: blur(10px) saturate(1.05);
-  color: rgba(246,242,255,0.88);
-
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.35);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill--ok .dxl-pill__dot {
-  background: rgba(34,197,94,0.95);
-  box-shadow: 0 0 0 3px rgba(34,197,94,0.18), 0 12px 35px rgba(34,197,94,0.10);
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill--warn .dxl-pill__dot {
-  background: rgba(250,204,21,0.95);
-  box-shadow: 0 0 0 3px rgba(250,204,21,0.18), 0 12px 35px rgba(250,204,21,0.10);
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-  min-width: 0;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__l1 {
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-weight: 900;
-  opacity: 0.92;
-  white-space: nowrap;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__l2 {
-  margin-top: 4px;
-  font-size: 12px;
-  opacity: 0.72;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__x {
-  margin-left: 4px;
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
-  color: rgba(246,242,255,0.82);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+  box-shadow: 0 18px 55px rgba(0,0,0,0.45);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  html[data-dxl="DXL01_20260128"] .dxl-pill__x:hover {
-    filter: brightness(1.08);
+  html[data-dxl="DXL01_20260128"] .dxl-toasts__hide:hover {
+    filter: brightness(1.06);
     transform: translate3d(0,-1px,0);
   }
 }
 
-/* DonÃ¢â‚¬â„¢t crowd tiny viewports */
-@media (max-width: 520px) {
-  html[data-dxl="DXL01_20260128"] .dxl-pill {
-    left: 10px;
-    right: 10px;
-    max-width: none;
-  }
+html[data-dxl="DXL01_20260128"] .dxl-toast {
+  width: min(360px, calc(100vw - 28px));
+  pointer-events: none;
+
+  border-radius: 16px;
+  padding: 10px 12px;
+
+  background: rgba(0,0,0,0.38);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 22px 70px rgba(0,0,0,0.55);
+
+  backdrop-filter: blur(12px) saturate(1.05);
+
+  color: rgba(246,242,255,0.86);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+
+  animation: dxlToastIn 260ms cubic-bezier(0.16,1,0.30,1) both;
 }
 
-/* =========================================================
-   DXL-04 System Awareness Cues (DXL04_20260128)
-   - A tiny, tasteful Ã¢â‚¬Å“system readyÃ¢â‚¬Â status pill
-   - Non-invasive: fixed overlay
-   - Can be disabled via env: DXL_STATUS_PILL=0
-   ========================================================= */
-
-html[data-dxl="DXL01_20260128"] .dxl-pill {
-  position: fixed;
-  left: 14px;
-  bottom: 14px;
-  z-index: 50;
+html[data-dxl="DXL01_20260128"] .dxl-toast__top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  max-width: 420px;
-
-  padding: 10px 12px;
-  border-radius: 999px;
-
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.14);
-  box-shadow: 0 18px 55px rgba(0,0,0,0.48);
-
-  backdrop-filter: blur(10px) saturate(1.05);
-  color: rgba(246,242,255,0.88);
-
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  margin-bottom: 8px;
 }
 
-html[data-dxl="DXL01_20260128"] .dxl-pill__dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.35);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill--ok .dxl-pill__dot {
-  background: rgba(34,197,94,0.95);
-  box-shadow: 0 0 0 3px rgba(34,197,94,0.18), 0 12px 35px rgba(34,197,94,0.10);
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill--warn .dxl-pill__dot {
-  background: rgba(250,204,21,0.95);
-  box-shadow: 0 0 0 3px rgba(250,204,21,0.18), 0 12px 35px rgba(250,204,21,0.10);
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.05;
-  min-width: 0;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__l1 {
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind {
+  font-size: 10px;
   font-weight: 900;
-  opacity: 0.92;
-  white-space: nowrap;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__l2 {
-  margin-top: 4px;
-  font-size: 12px;
-  opacity: 0.72;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill__x {
-  margin-left: 4px;
-  width: 26px;
-  height: 26px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 8px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.12);
-  background: rgba(255,255,255,0.05);
-  color: rgba(246,242,255,0.82);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+  background: rgba(255,255,255,0.04);
+  color: rgba(246,242,255,0.74);
 }
 
-@media (hover: hover) and (pointer: fine) {
-  html[data-dxl="DXL01_20260128"] .dxl-pill__x:hover {
-    filter: brightness(1.08);
-    transform: translate3d(0,-1px,0);
-  }
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--optimized {
+  border-color: rgba(168,85,247,0.22);
+}
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--scheduled {
+  border-color: rgba(59,130,246,0.22);
+}
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--published {
+  border-color: rgba(34,197,94,0.22);
+}
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--bundle {
+  border-color: rgba(250,204,21,0.22);
 }
 
-/* DonÃ¢â‚¬â„¢t crowd tiny viewports */
-@media (max-width: 520px) {
-  html[data-dxl="DXL01_20260128"] .dxl-pill {
-    left: 10px;
-    right: 10px;
-    max-width: none;
-  }
+html[data-dxl="DXL01_20260128"] .dxl-toast__ago {
+  font-size: 11px;
+  opacity: 0.62;
+  white-space: nowrap;
 }
 
-/* =========================================================
-   DXL-05 Agent Activity Pulse (DXL05_20260128)
-   - Subtle shimmer + â€œaliveâ€ pulse when activity is active
-   - Activated only when html[data-dxl="DXL01_20260128"]
-   ========================================================= */
-
-html[data-dxl="DXL01_20260128"] .dxl-pill--active {
-  border: 1px solid rgba(168,85,247,0.22);
-  box-shadow:
-    0 18px 55px rgba(0,0,0,0.52),
-    0 18px 70px rgba(168,85,247,0.14);
-  overflow: hidden;
+html[data-dxl="DXL01_20260128"] .dxl-toast__title {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
-html[data-dxl="DXL01_20260128"] .dxl-pill--active::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  background:
-    radial-gradient(600px 140px at 20% 30%, rgba(168,85,247,0.22), transparent 60%),
-    radial-gradient(520px 140px at 80% 70%, rgba(59,130,246,0.16), transparent 62%);
-  opacity: 0.85;
-  filter: blur(10px);
-  animation: dxlPillGlow 2.6s cubic-bezier(0.16,1,0.30,1) infinite;
-  pointer-events: none;
+html[data-dxl="DXL01_20260128"] .dxl-toast__detail {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.72;
 }
 
-html[data-dxl="DXL01_20260128"] .dxl-pill--active::after {
-  content: "";
-  position: absolute;
-  top: -40%;
-  left: -60%;
-  width: 60%;
-  height: 180%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
-  transform: rotate(18deg);
-  animation: dxlPillSheen 3.4s cubic-bezier(0.16,1,0.30,1) infinite;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  opacity: 0.75;
-}
-
-html[data-dxl="DXL01_20260128"] .dxl-pill--active .dxl-pill__dot {
-  background: rgba(168,85,247,0.95);
-  box-shadow: 0 0 0 3px rgba(168,85,247,0.20), 0 12px 35px rgba(168,85,247,0.12);
-}
-
-@keyframes dxlPillGlow {
-  0%   { opacity: 0.55; transform: translate3d(0,0,0) scale(1.00); }
-  50%  { opacity: 0.92; transform: translate3d(0,-1px,0) scale(1.01); }
-  100% { opacity: 0.55; transform: translate3d(0,0,0) scale(1.00); }
-}
-
-@keyframes dxlPillSheen {
-  0%   { transform: translate3d(0,0,0) rotate(18deg); opacity: 0; }
-  20%  { opacity: 0.75; }
-  55%  { opacity: 0.35; }
-  100% { transform: translate3d(220%,0,0) rotate(18deg); opacity: 0; }
+@keyframes dxlToastIn {
+  from { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.98); }
+  to   { opacity: 1; transform: translate3d(0, 0px, 0) scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-dxl="DXL01_20260128"] .dxl-pill--active::before,
-  html[data-dxl="DXL01_20260128"] .dxl-pill--active::after {
+  html[data-dxl="DXL01_20260128"] .dxl-toast {
     animation: none !important;
   }
 }
 
 /* =========================================================
-   DXL-06 World Pulse Sync (DXL06_20260128)
-   - When agents are active: the whole “world” subtly breathes
-   - Trigger: html[data-dxl="DXL01_20260128"][data-dxl-active="1"]
-   - Respects prefers-reduced-motion
+   DXL-07 Live Optimization Toasts (DXL07_20260128)
+   - Ultra subtle, premium notifications
+   - Kill switch: DXL_TOASTS=0
    ========================================================= */
 
-html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowA,
-html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowB {
-  animation-duration: 14s;
-  animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1);
+html[data-dxl="DXL01_20260128"] .dxl-toasts {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  pointer-events: none; /* toasts are not interactive */
 }
 
-html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowA {
-  animation-name: dxlPulseGlowA;
-  animation-iteration-count: infinite;
+html[data-dxl="DXL01_20260128"] .dxl-toasts__hide {
+  pointer-events: auto;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 900;
+
+  padding: 8px 10px;
+  border-radius: 999px;
+
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(246,242,255,0.70);
+
+  backdrop-filter: blur(10px) saturate(1.05);
+  box-shadow: 0 18px 55px rgba(0,0,0,0.45);
 }
 
-html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowB {
-  animation-name: dxlPulseGlowB;
-  animation-iteration-count: infinite;
+@media (hover: hover) and (pointer: fine) {
+  html[data-dxl="DXL01_20260128"] .dxl-toasts__hide:hover {
+    filter: brightness(1.06);
+    transform: translate3d(0,-1px,0);
+  }
 }
 
-/* Add a faint global luminance “breath” (does not affect layout) */
-html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__base {
-  animation: dxlPulseBase 12s cubic-bezier(0.16, 1, 0.30, 1) infinite;
+html[data-dxl="DXL01_20260128"] .dxl-toast {
+  width: min(360px, calc(100vw - 28px));
+  pointer-events: none;
+
+  border-radius: 16px;
+  padding: 10px 12px;
+
+  background: rgba(0,0,0,0.38);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 22px 70px rgba(0,0,0,0.55);
+
+  backdrop-filter: blur(12px) saturate(1.05);
+
+  color: rgba(246,242,255,0.86);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+
+  animation: dxlToastIn 260ms cubic-bezier(0.16,1,0.30,1) both;
 }
 
-html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__vignette {
-  animation: dxlPulseVignette 12s cubic-bezier(0.16, 1, 0.30, 1) infinite;
+html[data-dxl="DXL01_20260128"] .dxl-toast__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-/* Keyframes: intentionally subtle */
-@keyframes dxlPulseGlowA {
-  0%   { opacity: 0.78; transform: translate3d(-1.2%, -0.8%, 0) scale(1.02); filter: blur(10px); }
-  50%  { opacity: 0.98; transform: translate3d( 1.6%,  1.0%, 0) scale(1.05); filter: blur(12px); }
-  100% { opacity: 0.78; transform: translate3d(-1.2%, -0.8%, 0) scale(1.02); filter: blur(10px); }
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 6px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  color: rgba(246,242,255,0.74);
 }
 
-@keyframes dxlPulseGlowB {
-  0%   { opacity: 0.70; transform: translate3d( 1.0%,  0.6%, 0) scale(1.02); filter: blur(11px); }
-  50%  { opacity: 0.90; transform: translate3d(-1.5%, -0.9%, 0) scale(1.04); filter: blur(13px); }
-  100% { opacity: 0.70; transform: translate3d( 1.0%,  0.6%, 0) scale(1.02); filter: blur(11px); }
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--optimized {
+  border-color: rgba(168,85,247,0.22);
+}
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--scheduled {
+  border-color: rgba(59,130,246,0.22);
+}
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--published {
+  border-color: rgba(34,197,94,0.22);
+}
+html[data-dxl="DXL01_20260128"] .dxl-toast__kind--bundle {
+  border-color: rgba(250,204,21,0.22);
 }
 
-@keyframes dxlPulseBase {
-  0%   { opacity: 1.00; }
-  50%  { opacity: 1.00; filter: brightness(1.04); }
-  100% { opacity: 1.00; }
+html[data-dxl="DXL01_20260128"] .dxl-toast__ago {
+  font-size: 11px;
+  opacity: 0.62;
+  white-space: nowrap;
 }
 
-@keyframes dxlPulseVignette {
-  0%   { opacity: 0.78; }
-  50%  { opacity: 0.66; }
-  100% { opacity: 0.78; }
+html[data-dxl="DXL01_20260128"] .dxl-toast__title {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+html[data-dxl="DXL01_20260128"] .dxl-toast__detail {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  opacity: 0.72;
+}
+
+@keyframes dxlToastIn {
+  from { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.98); }
+  to   { opacity: 1; transform: translate3d(0, 0px, 0) scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowA,
-  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowB,
-  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__base,
-  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__vignette {
+  html[data-dxl="DXL01_20260128"] .dxl-toast {
     animation: none !important;
-    filter: none !important;
   }
 }
