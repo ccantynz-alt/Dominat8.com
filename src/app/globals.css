@@ -1,6 +1,6 @@
 /* =========================================================
    DXL-04 System Awareness Cues (DXL04_20260128)
-   - A tiny, tasteful “system ready” status pill
+   - A tiny, tasteful â€œsystem readyâ€ status pill
    - Non-invasive: fixed overlay
    - Can be disabled via env: DXL_STATUS_PILL=0
    ========================================================= */
@@ -93,7 +93,7 @@ html[data-dxl="DXL01_20260128"] .dxl-pill__x {
   }
 }
 
-/* Don’t crowd tiny viewports */
+/* Donâ€™t crowd tiny viewports */
 @media (max-width: 520px) {
   html[data-dxl="DXL01_20260128"] .dxl-pill {
     left: 10px;
@@ -104,7 +104,7 @@ html[data-dxl="DXL01_20260128"] .dxl-pill__x {
 
 /* =========================================================
    DXL-04 System Awareness Cues (DXL04_20260128)
-   - A tiny, tasteful “system ready” status pill
+   - A tiny, tasteful â€œsystem readyâ€ status pill
    - Non-invasive: fixed overlay
    - Can be disabled via env: DXL_STATUS_PILL=0
    ========================================================= */
@@ -197,11 +197,78 @@ html[data-dxl="DXL01_20260128"] .dxl-pill__x {
   }
 }
 
-/* Don’t crowd tiny viewports */
+/* Donâ€™t crowd tiny viewports */
 @media (max-width: 520px) {
   html[data-dxl="DXL01_20260128"] .dxl-pill {
     left: 10px;
     right: 10px;
     max-width: none;
+  }
+}
+
+/* =========================================================
+   DXL-05 Agent Activity Pulse (DXL05_20260128)
+   - Subtle shimmer + “alive” pulse when activity is active
+   - Activated only when html[data-dxl="DXL01_20260128"]
+   ========================================================= */
+
+html[data-dxl="DXL01_20260128"] .dxl-pill--active {
+  border: 1px solid rgba(168,85,247,0.22);
+  box-shadow:
+    0 18px 55px rgba(0,0,0,0.52),
+    0 18px 70px rgba(168,85,247,0.14);
+  overflow: hidden;
+}
+
+html[data-dxl="DXL01_20260128"] .dxl-pill--active::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background:
+    radial-gradient(600px 140px at 20% 30%, rgba(168,85,247,0.22), transparent 60%),
+    radial-gradient(520px 140px at 80% 70%, rgba(59,130,246,0.16), transparent 62%);
+  opacity: 0.85;
+  filter: blur(10px);
+  animation: dxlPillGlow 2.6s cubic-bezier(0.16,1,0.30,1) infinite;
+  pointer-events: none;
+}
+
+html[data-dxl="DXL01_20260128"] .dxl-pill--active::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 60%;
+  height: 180%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+  transform: rotate(18deg);
+  animation: dxlPillSheen 3.4s cubic-bezier(0.16,1,0.30,1) infinite;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: 0.75;
+}
+
+html[data-dxl="DXL01_20260128"] .dxl-pill--active .dxl-pill__dot {
+  background: rgba(168,85,247,0.95);
+  box-shadow: 0 0 0 3px rgba(168,85,247,0.20), 0 12px 35px rgba(168,85,247,0.12);
+}
+
+@keyframes dxlPillGlow {
+  0%   { opacity: 0.55; transform: translate3d(0,0,0) scale(1.00); }
+  50%  { opacity: 0.92; transform: translate3d(0,-1px,0) scale(1.01); }
+  100% { opacity: 0.55; transform: translate3d(0,0,0) scale(1.00); }
+}
+
+@keyframes dxlPillSheen {
+  0%   { transform: translate3d(0,0,0) rotate(18deg); opacity: 0; }
+  20%  { opacity: 0.75; }
+  55%  { opacity: 0.35; }
+  100% { transform: translate3d(220%,0,0) rotate(18deg); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-dxl="DXL01_20260128"] .dxl-pill--active::before,
+  html[data-dxl="DXL01_20260128"] .dxl-pill--active::after {
+    animation: none !important;
   }
 }

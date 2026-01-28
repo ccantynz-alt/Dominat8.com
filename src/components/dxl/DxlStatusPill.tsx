@@ -6,8 +6,13 @@ type ProbeOk = {
   ok?: boolean;
   stamp?: string;
   mode?: string;
-  vercel?: any;
-  git?: any;
+};
+
+type ActivityOk = {
+  ok?: boolean;
+  active?: boolean;
+  stamp?: string;
+  at?: string;
 };
 
 function safeText(s: unknown): string {
@@ -17,69 +22,103 @@ function safeText(s: unknown): string {
 }
 
 export default function DxlStatusPill() {
-  const [state, setState] = React.useState<{
+  const [hidden, setHidden] = React.useState(false);
+
+  const [probe, setProbe] = React.useState<{
     status: "init" | "ok" | "warn";
     line1: string;
     line2: string;
   }>({ status: "init", line1: "System", line2: "Checking…" });
 
+  const [activity, setActivity] = React.useState<{
+    active: boolean;
+    stamp: string;
+  }>({ active: false, stamp: "" });
+
   React.useEffect(() => {
     let alive = true;
 
-    async function run() {
+    async function tick() {
+      // 1) Probe (existing)
       try {
         const ts = Date.now();
         const res = await fetch(`/api/__probe__?ts=${ts}`, {
           method: "GET",
           cache: "no-store",
-          headers: { "x-dxl": "DXL04_20260128" },
+          headers: { "x-dxl": "DXL05_20260128" },
         });
 
         if (!alive) return;
 
         if (!res.ok) {
-          setState({ status: "warn", line1: "System", line2: `Limited (${res.status})` });
-          return;
+          setProbe({ status: "warn", line1: "System", line2: `Limited (${res.status})` });
+        } else {
+          const j = (await res.json()) as ProbeOk;
+          const stamp = safeText(j?.stamp) || "LIVE_OK";
+          const mode = safeText(j?.mode) || "ready";
+          setProbe({ status: "ok", line1: "System ready", line2: `${stamp} · ${mode}` });
         }
-
-        const j = (await res.json()) as ProbeOk;
-
-        const stamp = safeText(j?.stamp) || "LIVE_OK";
-        const mode = safeText(j?.mode) || "ready";
-
-        setState({ status: "ok", line1: "System ready", line2: `${stamp} · ${mode}` });
       } catch {
         if (!alive) return;
-        setState({ status: "warn", line1: "System", line2: "Offline / Limited" });
+        setProbe({ status: "warn", line1: "System", line2: "Offline / Limited" });
+      }
+
+      // 2) Activity (new)
+      try {
+        const ts = Date.now();
+        const res = await fetch(`/api/dxl/activity?ts=${ts}`, {
+          method: "GET",
+          cache: "no-store",
+          headers: { "x-dxl": "DXL05_20260128" },
+        });
+        if (!alive) return;
+
+        if (res.ok) {
+          const j = (await res.json()) as ActivityOk;
+          const active = !!j?.active;
+          const stamp = safeText(j?.stamp);
+          setActivity({ active, stamp });
+        } else {
+          setActivity({ active: false, stamp: "" });
+        }
+      } catch {
+        if (!alive) return;
+        setActivity({ active: false, stamp: "" });
       }
     }
 
-    run();
+    tick();
 
-    const id = window.setInterval(run, 45_000);
+    // Probe can be slower; activity can be a bit more frequent for “alive” feel.
+    const id = window.setInterval(tick, 20_000);
     return () => {
       alive = false;
       window.clearInterval(id);
     };
   }, []);
 
-  // Allow user to hide for the session
-  const [hidden, setHidden] = React.useState(false);
   if (hidden) return null;
 
-  const cls =
-    state.status === "ok"
+  const pillClass =
+    activity.active
+      ? "dxl-pill dxl-pill--active"
+      : probe.status === "ok"
       ? "dxl-pill dxl-pill--ok"
-      : state.status === "warn"
+      : probe.status === "warn"
       ? "dxl-pill dxl-pill--warn"
       : "dxl-pill";
 
+  const line1 = activity.active ? "Agents running" : probe.line1;
+  const line2 = activity.active
+    ? (activity.stamp ? `${activity.stamp} · optimizing…` : "optimizing…")
+    : probe.line2;
+
   return (
-    <div className={cls} role="status" aria-live="polite">
+    <div className={pillClass} role="status" aria-live="polite">
       <div className="dxl-pill__dot" />
       <div className="dxl-pill__text">
-        <div className="dxl-pill__l1">{state.line1}</div>
-        <div className="dxl-pill__l2">{state.line2}</div>
+        <div className="dxl-pill__l1">{line1}</div>
+        <div className="dxl-pill__l2">{line2}</div>
       </div>
 
       <button
