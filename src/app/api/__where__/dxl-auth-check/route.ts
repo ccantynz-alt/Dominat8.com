@@ -1,40 +1,47 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
-export const runtime = "nodejs";
+export const runtime = "nodejs"; // ensure we can read process.env and headers consistently
 
-function nowIso() {
-  try { return new Date().toISOString(); } catch { return ""; }
-}
-function envFirst(names: string[]): string {
-  for (const n of names) {
-    const v = process.env[n];
-    if (v && String(v).trim()) return String(v).trim();
-  }
-  return "";
-}
+export async function GET(request: Request) {
+  const url = new URL(request.url);
 
-const CHECKED = ["ADMIN_TOKEN","ADMIN_API_KEY","ADMIN_ACCESS_CODE","ADMIN_ACCESS_KEY","ADMIN_SECRET"];
+  const headers = request.headers;
 
-export async function GET() {
-  const token = envFirst(CHECKED);
-  const has = !!token;
-  const len = token ? String(token).length : 0;
+  const pick = (name: string) => headers.get(name) ?? null;
 
-  return NextResponse.json(
-    {
-      ok: true,
-      at: nowIso(),
-      stamp: "DXL_AUTHCHECK_LOCATOR_HARDENED_20260129",
-      hasAdminToken: has,
-      tokenLength: len,
-      checkedNames: CHECKED
+  const data = {
+    ok: true,
+    stamp: "DXL_WHERE_LOCATOR_AUTHCHECK_20260129",
+    at: new Date().toISOString(),
+    method: "GET",
+    url: url.toString(),
+    pathname: url.pathname,
+    host: pick("host"),
+    vercel: {
+      region: process.env.VERCEL_REGION ?? null,
+      deploymentId: process.env.VERCEL_DEPLOYMENT_ID ?? null,
+      env: process.env.VERCEL_ENV ?? null,
+      url: process.env.VERCEL_URL ?? null
     },
-    {
-      headers: {
-        "cache-control": "no-store, max-age=0",
-        "x-dxl-authcheck": "DXL_AUTHCHECK_LOCATOR_HARDENED_20260129"
-      }
+    headers: {
+      "x-vercel-id": pick("x-vercel-id"),
+      "x-vercel-ip-country": pick("x-vercel-ip-country"),
+      "x-vercel-ip-city": pick("x-vercel-ip-city"),
+      "x-forwarded-for": pick("x-forwarded-for"),
+      "x-forwarded-proto": pick("x-forwarded-proto"),
+      "user-agent": pick("user-agent"),
+      "accept": pick("accept"),
+      "cache-control": pick("cache-control"),
+      "pragma": pick("pragma")
     }
-  );
+  };
+
+  const res = NextResponse.json(data, { status: 200 });
+
+  // Make absolutely sure this never caches (prevents sticky cached 404/HTML)
+  res.headers.set("cache-control", "no-store, max-age=0");
+  res.headers.set("pragma", "no-cache");
+  res.headers.set("x-dxl-where", "DXL_WHERE_LOCATOR_AUTHCHECK_20260129");
+
+  return res;
 }
