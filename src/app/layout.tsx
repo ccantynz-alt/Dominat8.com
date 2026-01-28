@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html\ lang="en"\ data-dxl="DXL01_20260128">
-      <body className="dxl-body" className="min-h-screen bg-black text-white antialiased">
+    <html lang="en" data-dxl="DXL01_20260128">
+      <body className="dxl-body min-h-screen bg-black text-white antialiased">
       <DxlAtmosphere />
       <div className="dxl-content">
         {/* D8_PHASE1_LOCK_DEPLOY_STYLING_v1_20260128 */}
