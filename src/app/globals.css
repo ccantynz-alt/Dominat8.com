@@ -1,6 +1,6 @@
 /* =========================================================
    DXL-04 System Awareness Cues (DXL04_20260128)
-   - A tiny, tasteful â€œsystem readyâ€ status pill
+   - A tiny, tasteful Ã¢â‚¬Å“system readyÃ¢â‚¬Â status pill
    - Non-invasive: fixed overlay
    - Can be disabled via env: DXL_STATUS_PILL=0
    ========================================================= */
@@ -93,7 +93,7 @@ html[data-dxl="DXL01_20260128"] .dxl-pill__x {
   }
 }
 
-/* Donâ€™t crowd tiny viewports */
+/* DonÃ¢â‚¬â„¢t crowd tiny viewports */
 @media (max-width: 520px) {
   html[data-dxl="DXL01_20260128"] .dxl-pill {
     left: 10px;
@@ -104,7 +104,7 @@ html[data-dxl="DXL01_20260128"] .dxl-pill__x {
 
 /* =========================================================
    DXL-04 System Awareness Cues (DXL04_20260128)
-   - A tiny, tasteful â€œsystem readyâ€ status pill
+   - A tiny, tasteful Ã¢â‚¬Å“system readyÃ¢â‚¬Â status pill
    - Non-invasive: fixed overlay
    - Can be disabled via env: DXL_STATUS_PILL=0
    ========================================================= */
@@ -197,7 +197,7 @@ html[data-dxl="DXL01_20260128"] .dxl-pill__x {
   }
 }
 
-/* Donâ€™t crowd tiny viewports */
+/* DonÃ¢â‚¬â„¢t crowd tiny viewports */
 @media (max-width: 520px) {
   html[data-dxl="DXL01_20260128"] .dxl-pill {
     left: 10px;
@@ -208,7 +208,7 @@ html[data-dxl="DXL01_20260128"] .dxl-pill__x {
 
 /* =========================================================
    DXL-05 Agent Activity Pulse (DXL05_20260128)
-   - Subtle shimmer + “alive” pulse when activity is active
+   - Subtle shimmer + â€œaliveâ€ pulse when activity is active
    - Activated only when html[data-dxl="DXL01_20260128"]
    ========================================================= */
 
@@ -270,5 +270,72 @@ html[data-dxl="DXL01_20260128"] .dxl-pill--active .dxl-pill__dot {
   html[data-dxl="DXL01_20260128"] .dxl-pill--active::before,
   html[data-dxl="DXL01_20260128"] .dxl-pill--active::after {
     animation: none !important;
+  }
+}
+
+/* =========================================================
+   DXL-06 World Pulse Sync (DXL06_20260128)
+   - When agents are active: the whole “world” subtly breathes
+   - Trigger: html[data-dxl="DXL01_20260128"][data-dxl-active="1"]
+   - Respects prefers-reduced-motion
+   ========================================================= */
+
+html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowA,
+html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowB {
+  animation-duration: 14s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.30, 1);
+}
+
+html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowA {
+  animation-name: dxlPulseGlowA;
+  animation-iteration-count: infinite;
+}
+
+html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowB {
+  animation-name: dxlPulseGlowB;
+  animation-iteration-count: infinite;
+}
+
+/* Add a faint global luminance “breath” (does not affect layout) */
+html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__base {
+  animation: dxlPulseBase 12s cubic-bezier(0.16, 1, 0.30, 1) infinite;
+}
+
+html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__vignette {
+  animation: dxlPulseVignette 12s cubic-bezier(0.16, 1, 0.30, 1) infinite;
+}
+
+/* Keyframes: intentionally subtle */
+@keyframes dxlPulseGlowA {
+  0%   { opacity: 0.78; transform: translate3d(-1.2%, -0.8%, 0) scale(1.02); filter: blur(10px); }
+  50%  { opacity: 0.98; transform: translate3d( 1.6%,  1.0%, 0) scale(1.05); filter: blur(12px); }
+  100% { opacity: 0.78; transform: translate3d(-1.2%, -0.8%, 0) scale(1.02); filter: blur(10px); }
+}
+
+@keyframes dxlPulseGlowB {
+  0%   { opacity: 0.70; transform: translate3d( 1.0%,  0.6%, 0) scale(1.02); filter: blur(11px); }
+  50%  { opacity: 0.90; transform: translate3d(-1.5%, -0.9%, 0) scale(1.04); filter: blur(13px); }
+  100% { opacity: 0.70; transform: translate3d( 1.0%,  0.6%, 0) scale(1.02); filter: blur(11px); }
+}
+
+@keyframes dxlPulseBase {
+  0%   { opacity: 1.00; }
+  50%  { opacity: 1.00; filter: brightness(1.04); }
+  100% { opacity: 1.00; }
+}
+
+@keyframes dxlPulseVignette {
+  0%   { opacity: 0.78; }
+  50%  { opacity: 0.66; }
+  100% { opacity: 0.78; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowA,
+  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__glowB,
+  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__base,
+  html[data-dxl="DXL01_20260128"][data-dxl-active="1"] .dxl-atmo__vignette {
+    animation: none !important;
+    filter: none !important;
   }
 }
