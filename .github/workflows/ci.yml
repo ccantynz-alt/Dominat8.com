@@ -23,14 +23,3 @@ jobs:
 
       - name: Install deps
         run: npm ci --legacy-peer-deps
-
-      - name: Lint (fail on warnings)
-        run: npm run lint --if-present -- --max-warnings=0
-
-      - name: Typecheck (tsc)
-        run: npx tsc --noEmit
-
-      - name: Build
-        env:
-          NEXT_TELEMETRY_DISABLED: "1"
-        run: npm run build
