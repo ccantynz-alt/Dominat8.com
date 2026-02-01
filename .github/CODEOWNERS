@@ -1,0 +1,7 @@
+# Default: you own everything
+* @ccantynz-alt
+
+# Extra protection around marketing + cockpit surfaces
+/src/app/(marketing)/ @ccantynz-alt
+/src/io/surfaces/ @ccantynz-alt
+/src/app/_client/ @ccantynz-alt

@@ -1,0 +1,13 @@
+{
+  "protectedPaths": [
+    "src/app/(marketing)/",
+    "src/app/page.tsx",
+    "src/app/layout.tsx",
+    "src/app/globals.css",
+    "src/io/surfaces/",
+    "src/app/_client/"
+  ],
+  "allowLabel": "override-protected-paths",
+  "allowFile": ".github/ALLOW_PROTECTED_PATHS",
+  "message": "Protected paths changed. Add PR label 'override-protected-paths' OR include file .github/ALLOW_PROTECTED_PATHS (with reason) to proceed."
+}
