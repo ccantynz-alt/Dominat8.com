@@ -1,66 +1,40 @@
-import React from "react";
+import * as React from "react";
+
+export type D8SectionTone = "plain" | "glass" | "dark" | "light";
 
 export type D8SectionProps = {
-  tone?: string;
-  lead?: string;
+  children?: React.ReactNode;
+  className?: string;
+
+  // Optional framing props used by marketing pages
   eyebrow?: string;
   title?: string;
-  subtitle?: string;
-  children?: React.ReactNode;
-  id?: string;
+  lead?: string;
+  tone?: D8SectionTone;
 };
 
-export function D8Section(props: D8SectionProps) {
-  tone?: string;
-  lead?: string;
-  eyebrow?: string;
-  const { title, subtitle, children, id } = props;
+export default function D8Section(props: D8SectionProps): JSX.Element {
+  const { children, className, eyebrow, title, lead } = props;
 
-  // Keep server-safe: no "use client", no browser-only APIs.
   return (
-    <section
-      id={id}
-      style={{
-        width: "100%",
-        maxWidth: 1160,
-        margin: "0 auto",
-        padding: "18px 16px",
-      }}
-    >
-      {(title || subtitle) && (
-        <header style={{ marginBottom: 12 }}>
-          {title && (
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 22,
-                lineHeight: 1.15,
-                fontWeight: 900,
-                color: "rgba(246,242,255,0.95)",
-                letterSpacing: "-0.01em",
-              }}
-            >
-              {title}
-            </h2>
-          )}
-          {subtitle && (
-            <p
-              style={{
-                margin: "8px 0 0 0",
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: "rgba(237,234,247,0.72)",
-              }}
-            >
-              {subtitle}
-            </p>
-          )}
+    <section className={className}>
+      {(eyebrow || title || lead) ? (
+        <header style={{ marginBottom: 16 }}>
+          {eyebrow ? (
+            <div style={{ fontSize: 12, letterSpacing: 1, opacity: 0.7, textTransform: "uppercase" }}>
+              {eyebrow}
+            </div>
+          ) : null}
+          {title ? (
+            <h2 style={{ margin: "6px 0 0 0" }}>{title}</h2>
+          ) : null}
+          {lead ? (
+            <p style={{ margin: "10px 0 0 0", opacity: 0.85 }}>{lead}</p>
+          ) : null}
         </header>
-      )}
+      ) : null}
 
-      <div>{children}</div>
+      {children}
     </section>
   );
 }
-
-export default D8Section;
