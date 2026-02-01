@@ -1,0 +1,34 @@
+
+> my-saas-app@0.1.0 build
+> next build
+
+  Γû▓ Next.js 14.2.5
+  - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/(marketing)/gallery/page.jsx
+73:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/app/admin/marketing-queue/page.tsx
+147:35  Warning: React Hook useEffect has a missing dependency: 'refresh'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+148:35  Warning: React Hook useEffect has a missing dependency: 'refresh'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/admin/projects/page.tsx
+20:1  Warning: Prevent client components from being async functions. See: https://nextjs.org/docs/messages/no-async-client-component  @next/next/no-async-client-component
+
+./src/app/api/__probe__/route.ts
+7:5  Error: Parsing error: '{' expected.
+
+./src/components/terminal/ProjectTerminal.tsx
+129:9  Warning: The 'steps' logical expression could make the dependencies of useMemo Hook (at line 137) change on every render. To fix this, wrap the initialization of 'steps' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+
+./src/lib/kv.ts
+13:1  Error: Definition for rule '@typescript-eslint/no-var-requires' was not found.  @typescript-eslint/no-var-requires
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/basic-features/eslint#disabling-rules
+
