@@ -1,0 +1,4 @@
+[main 742e8b6] fix: unbreak build (D8TV reset + AgentRunsPanel stub)
+ 3 files changed, 187 insertions(+), 55 deletions(-)
+ create mode 100644 _auto_logs/build_20260202_180454.log.txt
+ create mode 100644 _auto_logs/install_20260202_180453.log.txt
