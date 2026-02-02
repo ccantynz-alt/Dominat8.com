@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "site": {
+    "name": "Dominat8",
+    "production_url": "https://www.dominat8.com",
+    "repo": { "owner": "ccantynz-alt", "name": "my-saas-app", "base": "main" }
+  },
+  "guardrails": {
+    "no_visible_ui_changes_by_default": true,
+    "pr_only": true,
+    "one_small_improvement_per_pr": true,
+    "never_delete_core_routes": true,
+    "never_force_push_main": true
+  },
+  "definition_of_done": {
+    "must_pass": [
+      {
+        "id": "home_200",
+        "type": "http_status",
+        "url": "https://www.dominat8.com/",
+        "expect": 200
+      },
+      {
+        "id": "no_build_breakage",
+        "type": "repo_build_signal",
+        "expect": "build_should_pass"
+      },
+      {
+        "id": "goals_file_present",
+        "type": "repo_file_exists",
+        "path": "SITE_GOALS.json"
+      }
+    ],
+    "nice_to_have": [
+      {
+        "id": "copy_clarity",
+        "type": "content_check",
+        "url": "https://www.dominat8.com/",
+        "hints": [
+          "clear value proposition above the fold",
+          "a single primary CTA",
+          "pricing present somewhere"
+        ]
+      }
+    ]
+  },
+  "planner_policy": {
+    "max_tokens": 900,
+    "model_env": "D8_PLANNER_MODEL",
+    "default_model": "gpt-4.1-mini"
+  }
+}
