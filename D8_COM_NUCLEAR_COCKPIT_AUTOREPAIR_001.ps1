@@ -1,6 +1,6 @@
 # =================================================================================================
 # D8_COM_NUCLEAR_COCKPIT_AUTOREPAIR_001.ps1
-# Dominat8.com â€” Cockpit (/admin) + Health API + Auto-Repair (Redeploy Hook + Revalidate) + Guardrails
+# Dominat8.com Ã¢â‚¬â€ Cockpit (/admin) + Health API + Auto-Repair (Redeploy Hook + Revalidate) + Guardrails
 # PowerShell-only. Copy/paste safe. Creates backups. No visible public UI changes (admin-only routes).
 #
 # RUN (example):
