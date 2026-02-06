@@ -36,6 +36,18 @@ function getPresentedToken(req: NextRequest): string | null {
 }
 
 export function middleware(req: NextRequest) {
+  // NUKE_006: hard bypass for API + Next internals + static assets (prevents /api/* -> /404 via rewrites)
+  if (
+    req.nextUrl.pathname.startsWith("/api/") ||
+    req.nextUrl.pathname.startsWith("/_next/") ||
+    req.nextUrl.pathname.startsWith("/favicon") ||
+    req.nextUrl.pathname.startsWith("/robots") ||
+    req.nextUrl.pathname.startsWith("/sitemap") ||
+    req.nextUrl.pathname.startsWith("/assets") ||
+    req.nextUrl.pathname.match(/\.(?:png|jpg|jpeg|gif|svg|webp|ico|css|js|map|txt|xml)$/i)
+  ) {
+    return NextResponse.next();
+  }
   
   
   // D8_MW_ARGS_BYPASS_20260206_203956 (parameter-name-safe bypass)
