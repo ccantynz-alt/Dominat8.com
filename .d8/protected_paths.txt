@@ -1,7 +1,16 @@
-# Protected paths guardrail (prefix matches). One per line.
-# If a PR touches these, it must have the "protected-ok" label.
+# Protected paths (prefix match). If a PR touches any of these,
+# require label: protected-ok
+#
+# Examples:
+# src/app/api/
+# src/app/builder/
+# middleware.ts
+# src/middleware.ts
+# package.json
+# next.config.js
+
+src/app/api/
 middleware.ts
 src/middleware.ts
-src/app/api/d8/
-src/app/tv/
-src/app/builder/
+package.json
+next.config.js

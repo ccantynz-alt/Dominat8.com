@@ -1,0 +1,65 @@
+name: D8 Protected Paths
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  protected_paths:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute labels CSV
+        id: labels
+        shell: pwsh
+        run: |
+          $names = @()
+          foreach ($l in @${{ toJson(github.event.pull_request.labels) }}) { }
+          # safer: just use github-script for labels; set output there
+          "labels=" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Get labels + maybe add protected-touched label
+        uses: actions/github-script@v7
+        id: gl
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = (pr.labels || []).map(l => l.name);
+            core.setOutput("labelsCsv", labels.join(","));
+            // We'll add protected-touched only after detection (in next step)
+            return;
+
+      - name: Check protected paths
+        id: check
+        shell: pwsh
+        run: |
+          $base = "${{ github.event.pull_request.base.sha }}"
+          $head = "${{ github.event.pull_request.head.sha }}"
+          $labels = "${{ steps.gl.outputs.labelsCsv }}"
+          pwsh -NoProfile -File scripts/d8/guard/CHECK_PROTECTED_PATHS_270.ps1 `
+            -RepoRoot "${{ github.workspace }}" `
+            -BaseRef $base `
+            -HeadRef $head `
+            -LabelsCsv $labels `
+            -BypassLabel "protected-ok"
+
+      - name: Add protected-touched label (if failure)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "protected-touched";
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [label]
+            });

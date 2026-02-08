@@ -2,7 +2,7 @@ name: D8 Quality Gates
 
 on:
   pull_request:
-  workflow_dispatch:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -14,23 +14,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
 
-      - name: Install
-        run: npm ci
-
-      - name: Lint (non-blocking if missing)
-        run: npm run -s lint || true
-
-      - name: Typecheck (non-blocking if missing)
-        run: npm run -s typecheck || true
-
-      - name: Test (non-blocking if missing)
-        run: npm test --silent || true
-
-      - name: Build
-        run: npm run build
+      - name: Run gates (fast)
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File scripts/d8/gates/run_quality_gates.ps1 -RepoRoot "${{ github.workspace }}"
