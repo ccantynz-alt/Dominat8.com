@@ -1,0 +1,85 @@
+param(
+  [string] $RepoRoot  = "C:\Temp\FARMS\Dominat8.com",
+  [string] $Domain    = "www.dominat8.com",
+  [string] $ProbePath = "/api/d8/health",
+  [string] $StampPath = "/api/d8/stamp",
+  [int]    $LoopSeconds = 15,
+
+  [switch] $ApplyPatchesWhenRed,
+  [switch] $RunGatesWhenRed,
+  [switch] $PushAfterFix,
+  [switch] $BeepOnRed,
+
+  [string] $KillFile = "C:\Temp\D8_CONTROL\DOMINAT8_COM_COCKPIT\KILL_SWITCH.NUCLEAR"
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+
+function Ok($m){ Write-Host ("OK   " + $m) -ForegroundColor Green }
+function Warn($m){ Write-Host ("WARN " + $m) -ForegroundColor Yellow }
+function Info($m){ Write-Host ("INFO " + $m) -ForegroundColor Gray }
+
+$probe = Join-Path $RepoRoot "scripts\d8\health_probe.ps1"
+$patch = Join-Path $RepoRoot "scripts\d8\patch\AGENT_PATCH_PIPELINE_030.ps1"
+$gates = Join-Path $RepoRoot "scripts\d8\gates\run_quality_gates.ps1"
+
+if (-not (Test-Path -LiteralPath $RepoRoot)) { throw "RepoRoot missing: $RepoRoot" }
+if (-not (Test-Path -LiteralPath $probe)) { throw "Missing probe: $probe" }
+if (-not (Test-Path -LiteralPath $patch)) { throw "Missing patch pipeline: $patch" }
+
+Info "NUCLEAR CONTROL PLANE LOOP running..."
+Info ("RepoRoot=" + $RepoRoot)
+Info ("Probe=https://" + $Domain + $ProbePath)
+Info ("LoopSeconds=" + $LoopSeconds)
+Info ("KillFile=" + $KillFile)
+
+while ($true) {
+  if (Test-Path -LiteralPath $KillFile) {
+    Warn "Kill-switch detected. Exiting loop."
+    exit 0
+  }
+
+  $tsHuman = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+  & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $probe -Domain $Domain -ProbePath $ProbePath -TimeoutSec 20 | Out-Host
+  $isGreen = ($LASTEXITCODE -eq 0)
+
+  if ($isGreen) {
+    Ok ("GREEN  " + $tsHuman)
+  } else {
+    Warn ("RED    " + $tsHuman + " (Exit=" + $LASTEXITCODE + ")")
+    if ($BeepOnRed) { [console]::Beep(880,200); Start-Sleep -Milliseconds 75; [console]::Beep(660,200) }
+
+    if ($ApplyPatchesWhenRed) {
+      Info "Applying queued patches..."
+      & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $patch -RepoRoot $RepoRoot -DeleteAfterApply | Out-Host
+    }
+
+    if ($RunGatesWhenRed) {
+      if (Test-Path -LiteralPath $gates) {
+        Info "Running quality gates..."
+        & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $gates -RepoRoot $RepoRoot | Out-Host
+      } else {
+        Warn "Gates script missing; skipping."
+      }
+    }
+
+    if ($PushAfterFix) {
+      Info "Pushing branch HEAD..."
+      Push-Location -LiteralPath $RepoRoot
+      try { & git.exe push -u origin HEAD | Out-Host } finally { Pop-Location }
+    }
+  }
+
+  if ($StampPath) {
+    try {
+      $t2 = [int][double]::Parse((Get-Date -UFormat %s))
+      $u = "https://$Domain$StampPath?ts=$t2"
+      Info ("Stamp: " + $u)
+      & curl.exe -s --max-time 12 -H "Cache-Control: no-cache" -H "Pragma: no-cache" $u | Out-Host
+    } catch {}
+  }
+
+  Start-Sleep -Seconds $LoopSeconds
+}

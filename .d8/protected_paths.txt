@@ -1,0 +1,7 @@
+# Protected paths guardrail (prefix matches). One per line.
+# If a PR touches these, it must have the "protected-ok" label.
+middleware.ts
+src/middleware.ts
+src/app/api/d8/
+src/app/tv/
+src/app/builder/

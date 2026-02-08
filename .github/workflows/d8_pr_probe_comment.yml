@@ -1,0 +1,43 @@
+name: D8 PR Probe Comment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  probe_and_comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run probe (repo script)
+        id: probe
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $ts = [int][double]::Parse((Get-Date -UFormat %s))
+          $domain = "www.dominat8.com"
+          $path = "/api/d8/health"
+          $url = "https://$domain$path?ts=$ts"
+          Write-Host "URL=$url"
+          $hdr = & curl -s -D - -o /dev/null --max-time 20 -H "Cache-Control: no-cache" -H "Pragma: no-cache" "$url"
+          $first = ($hdr -split "`n")[0].Trim()
+          echo "first=$first" >> $env:GITHUB_OUTPUT
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const first = `${{ steps.probe.outputs.first }}` || "UNKNOWN";
+            const body = `🧪 D8 Probe: **${first}**\n\nTarget: https://www.dominat8.com/api/d8/health`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body
+            });

@@ -1,0 +1,57 @@
+name: D8 Auto-Label Protected Touches
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label_if_protected:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect protected touches
+        id: detect
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $base = "${{ github.event.pull_request.base.sha }}"
+          $head = "${{ github.event.pull_request.head.sha }}"
+          $protectedFile = ".d8/protected_paths.txt"
+          if (-not (Test-Path $protectedFile)) { throw "Missing $protectedFile" }
+
+          $protected = Get-Content $protectedFile |
+            Where-Object { $_ -and (-not $_.Trim().StartsWith("#")) } |
+            ForEach-Object { $_.Trim() } | Where-Object { $_ }
+
+          $changed = (& git diff --name-only $base $head) -split "`n" | ForEach-Object { $_.Trim() } | Where-Object { $_ }
+
+          $hit = $false
+          foreach ($f in $changed) {
+            foreach ($p in $protected) {
+              if ($f.StartsWith($p, [System.StringComparison]::OrdinalIgnoreCase)) { $hit = $true; break }
+            }
+            if ($hit) { break }
+          }
+
+          "hit=$hit" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Add label if hit
+        if: steps.detect.outputs.hit == 'True'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "protected-touched";
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [label]
+            });

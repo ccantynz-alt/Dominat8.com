@@ -1,0 +1,36 @@
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+param(
+  [string] $RepoRoot = "C:\Temp\FARMS\Dominat8.com",
+  [string] $QueueDir = (Join-Path "C:\Temp\FARMS\Dominat8.com" "patches\queue"),
+  [switch] $DeleteAfterApply
+)
+
+function Ok($m){ Write-Host ("OK   " + $m) -ForegroundColor Green }
+function Warn($m){ Write-Host ("WARN " + $m) -ForegroundColor Yellow }
+function Info($m){ Write-Host ("INFO " + $m) -ForegroundColor Gray }
+
+if (-not (Test-Path -LiteralPath $QueueDir)) { New-Item -ItemType Directory -Path $QueueDir -Force | Out-Null }
+
+$items = Get-ChildItem -LiteralPath $QueueDir -Filter "*.ps1" -File | Sort-Object Name
+if (-not $items -or $items.Count -eq 0) { Info "No patches in queue."; exit 0 }
+
+Push-Location -LiteralPath $RepoRoot
+try {
+  foreach ($f in $items) {
+    Info ("Applying patch: " + $f.Name)
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $f.FullName | Out-Host
+    if ($LASTEXITCODE -ne 0) { Warn ("Patch failed (exit=" + $LASTEXITCODE + "): " + $f.Name); exit 2 }
+    if ($DeleteAfterApply) { Remove-Item -LiteralPath $f.FullName -Force; Ok ("Deleted: " + $f.Name) }
+  }
+
+  $porc = (git status --porcelain)
+  if ($porc) {
+    git add -A | Out-Null
+    git commit -m "chore(next5-030): apply patch queue" | Out-Null
+    Ok "Committed patch results"
+  } else {
+    Info "No repo changes after patches."
+  }
+} finally { Pop-Location }

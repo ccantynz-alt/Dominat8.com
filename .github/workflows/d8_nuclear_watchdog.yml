@@ -1,0 +1,43 @@
+name: D8 Nuclear Watchdog (open issue on fail)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe target
+        id: probe
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Continue"
+          $ts = [int][double]::Parse((Get-Date -UFormat %s))
+          $url = "https://www.dominat8.com/api/d8/health?ts=$ts"
+          Write-Host "URL=$url"
+          $hdr = & curl -s -D - -o /dev/null --max-time 20 -H "Cache-Control: no-cache" -H "Pragma: no-cache" "$url"
+          $first = ($hdr -split "`n")[0].Trim()
+          echo "first=$first" >> $env:GITHUB_OUTPUT
+          if ($first -match "HTTP/\d+\.\d+\s+200") { exit 0 }
+          exit 1
+
+      - name: Open issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const first = `${{ steps.probe.outputs.first }}` || "UNKNOWN";
+            const title = `D8 Nuclear Watchdog: PROBE FAIL - ${new Date().toISOString()}`;
+            const body = `Probe failed.\n\nResult: **${first}**\n\nTarget: https://www.dominat8.com/api/d8/health\n\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body
+            });

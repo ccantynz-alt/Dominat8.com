@@ -1,0 +1,21 @@
+name: D8 Watchdog (Dominat8.com)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Probe
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File scripts/d8/health_probe.ps1 -Domain "www.dominat8.com" -ProbePath "/api/d8/health" -TimeoutSec 20
