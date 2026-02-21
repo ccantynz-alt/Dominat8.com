@@ -52,3 +52,6 @@ downloads/
 # D8_PHASE1_LOCK_DEPLOY_STYLING_v1_20260128
 *.bak_*
 *.bak
+
+# TypeScript build info
+tsconfig.tsbuildinfo
