@@ -6,7 +6,8 @@ param(
   [string]$HeadRef = "HEAD",
   [string]$ConfigPath = ".github/protected-paths.json",
   [string]$AllowFile = ".github/ALLOW_PROTECTED_PATHS",
-  [string]$PrLabels = ""
+  [string]$PrLabels = "",
+  [string]$RequireLabel = ""
 )
 
 function Fail([string]$m){ Write-Host $m -ForegroundColor Red; exit 1 }
@@ -35,7 +36,7 @@ if (Test-Path -LiteralPath $AllowFile) {
 }
 
 # allow override if label present
-$allowLabel = [string]$cfg.allowLabel
+$allowLabel = if ($RequireLabel) { $RequireLabel } else { [string]$cfg.allowLabel }
 if ($allowLabel -and $PrLabels -match [Regex]::Escape($allowLabel)) {
   Info "Override label present ($allowLabel). Protected paths check overridden."
   exit 0
