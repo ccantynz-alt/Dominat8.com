@@ -28,4 +28,4 @@ jobs:
       - name: Protected paths check
         shell: pwsh
         run: |
-          pwsh -NoProfile -File ".github/scripts/protected-paths.ps1" -BaseRef "origin/main" -HeadRef "HEAD" -ConfigPath ".github/protected-paths.json" -AllowFile ".github/ALLOW_PROTECTED_PATHS" -PrLabels "${{ steps.labels.outputs.labels }}"
+          pwsh -NoProfile -File ".github/scripts/protected-paths.ps1" -BaseRef "origin/main" -HeadRef "HEAD" -ConfigPath ".github/protected-paths.json" -AllowFile ".github/ALLOW_PROTECTED_PATHS" -RequireLabel "allow-protected-paths" -PrLabels "${{ steps.labels.outputs.labels }}"

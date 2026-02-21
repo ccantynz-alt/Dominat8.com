@@ -52,3 +52,18 @@ downloads/
 # D8_PHASE1_LOCK_DEPLOY_STYLING_v1_20260128
 *.bak_*
 *.bak
+
+# Agent/automation artifacts
+*.ps1
+agent_logs/
+patch_logs/
+bundle_logs/
+_auto_logs/
+build-output*.txt
+vercel-build-output.txt
+vercel-deploy-log.txt
+LOCK_GREEN_*
+
+# TypeScript build info
+tsconfig.tsbuildinfo
+

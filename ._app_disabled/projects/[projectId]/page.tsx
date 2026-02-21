@@ -6,7 +6,7 @@ type PageProps = {
   params: { projectId: string };
 };
 
-export default async function ProjectPage({ params }: PageProps) {
+export default function ProjectPage({ params }: PageProps) {
   const projectId = params?.projectId;
 
   return (
