@@ -151,7 +151,7 @@ export default function VideoStudioClient() {
     setErr(null);
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d")!;
     if (!ctx) return;
 
     stopAnimation();
