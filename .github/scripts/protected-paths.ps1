@@ -1,6 +1,3 @@
-Set-StrictMode -Version Latest
-$ErrorActionPreference="Stop"
-
 param(
   [string]$BaseRef = "origin/main",
   [string]$HeadRef = "HEAD",
@@ -8,6 +5,9 @@ param(
   [string]$AllowFile = ".github/ALLOW_PROTECTED_PATHS",
   [string]$PrLabels = ""
 )
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference="Stop"
 
 function Fail([string]$m){ Write-Host $m -ForegroundColor Red; exit 1 }
 function Info([string]$m){ Write-Host $m -ForegroundColor Cyan }

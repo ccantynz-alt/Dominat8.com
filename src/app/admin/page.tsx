@@ -43,6 +43,40 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Developer cockpit — primary CTA */}
+      <Link href="/admin/cockpit" className="block rounded-3xl border border-purple-500/20 bg-gradient-to-br from-purple-500/10 via-black/30 to-blue-500/10 p-6 hover:border-purple-500/30 transition group">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="text-lg font-semibold tracking-tight">Developer Cockpit</div>
+              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">LIVE</span>
+            </div>
+            <div className="mt-2 text-sm text-white/60">Mission control for the agent fleet. Launch agents, monitor runs, and track status in real-time.</div>
+          </div>
+          <div className="inline-flex items-center rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs group-hover:bg-white/10">
+            Open Cockpit &rarr;
+          </div>
+        </div>
+        <div className="mt-4 grid grid-cols-4 gap-3">
+          <div className="rounded-xl border border-white/8 bg-black/20 px-3 py-2">
+            <div className="text-[10px] text-white/40">Fleet</div>
+            <div className="text-sm font-bold text-white">8 agents</div>
+          </div>
+          <div className="rounded-xl border border-white/8 bg-black/20 px-3 py-2">
+            <div className="text-[10px] text-white/40">Categories</div>
+            <div className="text-sm font-bold text-white">4 roles</div>
+          </div>
+          <div className="rounded-xl border border-white/8 bg-black/20 px-3 py-2">
+            <div className="text-[10px] text-white/40">API</div>
+            <div className="text-sm font-bold text-white">Wired</div>
+          </div>
+          <div className="rounded-xl border border-white/8 bg-black/20 px-3 py-2">
+            <div className="text-[10px] text-white/40">Feed</div>
+            <div className="text-sm font-bold text-white">Real-time</div>
+          </div>
+        </div>
+      </Link>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card
           title="Projects"

@@ -1,16 +1,17 @@
-name: D8 Deploy (main -> Vercel Prod)
+name: Deploy to Production
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch: {}
+    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: d8-prod
   cancel-in-progress: true
 
 jobs:
-  build_and_deploy:
+  deploy:
+    name: Build & Deploy (Prod)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +24,7 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Build gate
-      continue-on-error: true
+      - name: Build
         run: npm run build
 
       - name: Install Vercel CLI
@@ -42,10 +42,9 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
-      - name: Probe (best effort)
-        if: always()
+      - name: Smoke test
+        if: success()
         run: |
           URL="${{ secrets.PROD_BASE_URL }}/api/__probe__?ts=$(date +%s)"
           echo "Probing: $URL"
-          curl -s -D - --max-time 20 "$URL" | head -n 60
-
+          curl -sf --max-time 20 "$URL" || echo "Probe failed (non-blocking)"

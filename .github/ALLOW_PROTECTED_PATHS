@@ -1,0 +1,3 @@
+Reason: Marketing machine homepage rebuild — rewriting src/app/page.tsx,
+adding client animation components, and fixing pre-existing build errors
+in protected marketing paths.

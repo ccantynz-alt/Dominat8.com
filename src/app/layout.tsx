@@ -9,6 +9,12 @@ import DxlToasts from "@/components/dxl/DxlToasts";
 export const metadata: Metadata = {
   title: "Dominat8",
   description: "AI-powered website factory.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "16x16", type: "image/x-icon" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function safeEnv(name: string): string | null {
-  try: any {
+  try {
     // @ts-ignore
     const v = process?.env?.[name];
     return typeof v === "string" && v.length ? v : null;
