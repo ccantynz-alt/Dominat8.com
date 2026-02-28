@@ -1,0 +1,11 @@
+PR #8 (Refactor marketing pages to use GlossyPageShell component system)
+
+This PR intentionally refactors all marketing pages (src/app/(marketing)/),
+the homepage (src/app/page.tsx), and admin shell components to use the new
+unified GlossyPageShell component system. These changes are reviewed and
+approved as part of the planned marketing page consolidation.
+
+Protected paths modified:
+- src/app/(marketing)/ — all marketing pages converted to GlossyPageShell
+- src/app/page.tsx — homepage rewritten with feature list and workflow
+- src/app/_client/ — AdminShellClient updated to use new icon system

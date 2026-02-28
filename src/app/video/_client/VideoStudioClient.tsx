@@ -153,6 +153,7 @@ export default function VideoStudioClient() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    const capturedCtx: CanvasRenderingContext2D = ctx;
 
     stopAnimation();
 
@@ -178,7 +179,7 @@ export default function VideoStudioClient() {
       }
       if (idx >= durations.length) {
         setActiveIndex(durations.length - 1);
-        drawFrame(ctx, w, h, shots[durations.length - 1], 1);
+        drawFrame(capturedCtx, w, h, shots[durations.length - 1], 1);
         stopAnimation();
         if (previewOnly) setStatus("ready");
         return;
@@ -186,7 +187,7 @@ export default function VideoStudioClient() {
       setActiveIndex(idx);
       const local = elapsed - acc;
       const p = Math.max(0, Math.min(1, local / durations[idx]));
-      drawFrame(ctx, w, h, shots[idx], p);
+      drawFrame(capturedCtx, w, h, shots[idx], p);
       rafRef.current = requestAnimationFrame(tick);
     }
 
