@@ -48,6 +48,7 @@ export default function HomePage() {
             <a href="#features" className="transition hover:text-white no-underline">Features</a>
             <Link href="/pricing" className="transition hover:text-white no-underline">Pricing</Link>
             <Link href="/templates" className="transition hover:text-white no-underline">Templates</Link>
+            <Link href="/admin/cockpit" className="transition hover:text-white no-underline">Developers</Link>
           </div>
 
           <div className="flex items-center gap-3">
@@ -471,13 +472,21 @@ export default function HomePage() {
             </div>
 
             {/* Links */}
-            <div className="grid grid-cols-2 gap-x-16 gap-y-4 text-sm sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-x-16 gap-y-4 text-sm sm:grid-cols-4">
               <div>
                 <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/30">Product</div>
                 <div className="space-y-2.5">
                   <Link href="/templates" className="block text-white/55 no-underline transition hover:text-white">Templates</Link>
                   <Link href="/pricing" className="block text-white/55 no-underline transition hover:text-white">Pricing</Link>
                   <Link href="/use-cases" className="block text-white/55 no-underline transition hover:text-white">Use cases</Link>
+                </div>
+              </div>
+              <div>
+                <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-white/30">Developers</div>
+                <div className="space-y-2.5">
+                  <Link href="/admin/cockpit" className="block text-white/55 no-underline transition hover:text-white">Cockpit</Link>
+                  <Link href="/admin/agents" className="block text-white/55 no-underline transition hover:text-white">Agents</Link>
+                  <Link href="/admin" className="block text-white/55 no-underline transition hover:text-white">Admin</Link>
                 </div>
               </div>
               <div>

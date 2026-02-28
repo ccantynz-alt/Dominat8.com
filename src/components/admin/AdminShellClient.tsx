@@ -57,6 +57,7 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
   const nav: NavItem[] = useMemo(
     () => [
       { href: "/admin", label: "Dashboard", hint: "Overview" },
+      { href: "/admin/cockpit", label: "Cockpit", hint: "Mission control" },
       { href: "/admin/projects", label: "Projects", hint: "Your sites" },
       { href: "/admin/agents", label: "Agents", hint: "Runs & Bundles" },
       { href: "/admin/domains", label: "Domains", hint: "Custom domains" },
