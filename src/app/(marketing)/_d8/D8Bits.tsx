@@ -1,6 +1,11 @@
 import React from "react";
 
-export function D8Card(props: { children?: React.ReactNode }) {
+export function D8Card(props: {
+  children?: React.ReactNode;
+  title?: string;
+  body?: string;
+  kicker?: string;
+}) {
   return (
     <div
       style={{
@@ -11,6 +16,21 @@ export function D8Card(props: { children?: React.ReactNode }) {
         boxShadow: "0 18px 55px rgba(0,0,0,0.35)",
       }}
     >
+      {props.kicker && (
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase", color: "rgba(168,85,247,0.70)", marginBottom: 6 }}>
+          {props.kicker}
+        </div>
+      )}
+      {props.title && (
+        <div style={{ fontSize: 15, fontWeight: 800, color: "rgba(237,234,247,0.95)", marginBottom: 4 }}>
+          {props.title}
+        </div>
+      )}
+      {props.body && (
+        <div style={{ fontSize: 13, lineHeight: 1.55, color: "rgba(237,234,247,0.68)" }}>
+          {props.body}
+        </div>
+      )}
       {props.children}
     </div>
   );

@@ -1,0 +1,3 @@
+Bug fix: correcting TypeScript parse errors in src/app/_client/D8TV.tsx
+that were introduced by a malformed function body. This override is required
+to allow the fix to land on main.
