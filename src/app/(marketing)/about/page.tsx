@@ -1,6 +1,6 @@
+import GlossyPageShell, { GlossyPageHeader, GlossyCard } from "@/components/ui/GlossyPageShell";
+import GlossyIcon, { GlossyIconInline } from "@/components/ui/GlossyIcon";
 import Link from "next/link";
-import MarketingCTA from "@/src/components/marketing/MarketingCTA";
-import SeoJsonLd from "@/src/components/marketing/SeoJsonLd";
 
 export const metadata = {
   title: "About — Dominat8",
@@ -9,50 +9,88 @@ export const metadata = {
 };
 
 export default function AboutPage() {
-  const orgJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "Dominat8",
-    url: "https://www.dominat8.com",
-    description:
-      "AI website automation builder for generating, optimizing, and publishing high-converting websites.",
-  };
-
   return (
-    <main className="mx-auto w-full max-w-3xl px-6 py-10">
-      <SeoJsonLd data={orgJsonLd} />
+    <GlossyPageShell>
+      <GlossyPageHeader
+        icon="star"
+        eyebrow="About Us"
+        title="About Dominat8"
+        subtitle="We build the tools that let you ship premium, conversion-first websites faster than ever — powered by AI agents that handle the hard parts."
+      />
 
-      <div className="mb-6">
-        <Link href="/" className="text-sm opacity-70 hover:opacity-100">
-          ← Back home
-        </Link>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 14 }}>
+        <GlossyCard icon="bolt" title="Speed">
+          Get from idea to published site fast. Our AI generates complete site specs, pages, and copy from a simple brief.
+        </GlossyCard>
+        <GlossyCard icon="chart" title="Growth">
+          SEO structure, metadata, and conversion-first pages built into every site by default.
+        </GlossyCard>
+        <GlossyCard icon="cpu" title="Automation">
+          Repeatable agent-driven workflows handle generation, optimization, and publishing without manual effort.
+        </GlossyCard>
+        <GlossyCard icon="star" title="Quality">
+          Clean output with premium framing. Every site looks expensive and ships with confidence.
+        </GlossyCard>
       </div>
 
-      <h1 className="text-3xl font-semibold tracking-tight">About Dominat8</h1>
-      <p className="mt-3 text-base opacity-80">
-        Dominat8 helps you build and ship websites faster using AI agents. Generate a complete site
-        foundation, run SEO + conversion passes, then publish to your custom domain.
-      </p>
-
-      <section className="mt-8 rounded-2xl border border-black/10 bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold">What we focus on</h2>
-        <ul className="mt-4 list-disc space-y-2 pl-6 text-sm opacity-80">
-          <li>Speed: get from idea to published site fast</li>
-          <li>Growth: SEO structure, metadata, and conversion-first pages</li>
-          <li>Automation: repeatable agent-driven workflows</li>
-          <li>Quality: clean output that’s easy to refine and publish</li>
-        </ul>
+      <section
+        style={{
+          marginTop: 32,
+          borderRadius: 20,
+          padding: 28,
+          background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+          border: "1px solid rgba(255,255,255,0.10)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <GlossyIcon name="rocket" size={38} />
+          <div style={{ fontSize: 16, fontWeight: 800, color: "rgba(237,234,247,0.95)" }}>Our Mission</div>
+        </div>
+        <p style={{ marginTop: 12, fontSize: 14, lineHeight: 1.6, color: "rgba(237,234,247,0.72)" }}>
+          Dominat8 exists to eliminate the gap between &ldquo;I need a website&rdquo; and &ldquo;I have a premium, conversion-optimized
+          site live on my domain.&rdquo; We combine AI generation with battle-tested design patterns so every site ships
+          polished, fast, and ready to convert.
+        </p>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-black/10 bg-black/[0.02] p-6">
-        <div className="text-sm font-semibold">Next step</div>
-        <p className="mt-2 text-sm opacity-80">
+      <section
+        style={{
+          marginTop: 24,
+          borderRadius: 20,
+          padding: 28,
+          background: "linear-gradient(135deg, rgba(168,85,247,0.10), rgba(59,130,246,0.06))",
+          border: "1px solid rgba(255,255,255,0.10)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          textAlign: "center",
+        }}
+      >
+        <GlossyIcon name="sparkle" size={44} style={{ margin: "0 auto" }} />
+        <div style={{ marginTop: 12, fontSize: 16, fontWeight: 800, color: "rgba(237,234,247,0.95)" }}>Ready to get started?</div>
+        <p style={{ marginTop: 8, fontSize: 14, color: "rgba(237,234,247,0.68)" }}>
           Start free and generate your first website.
         </p>
-        <div className="mt-4">
-          <MarketingCTA />
-        </div>
+        <Link
+          href="/templates"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            marginTop: 16,
+            padding: "12px 20px",
+            borderRadius: 14,
+            textDecoration: "none",
+            fontWeight: 800,
+            fontSize: 14,
+            color: "#07070B",
+            background: "linear-gradient(90deg, rgba(168,85,247,1), rgba(59,130,246,1))",
+            boxShadow: "0 18px 55px rgba(168,85,247,0.26), 0 10px 24px rgba(59,130,246,0.16)",
+            border: "1px solid rgba(255,255,255,0.10)",
+          }}
+        >
+          <GlossyIconInline name="rocket" size={16} /> Start Building
+        </Link>
       </section>
-    </main>
+    </GlossyPageShell>
   );
 }

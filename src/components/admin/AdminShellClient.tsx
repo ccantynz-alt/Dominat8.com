@@ -3,23 +3,13 @@
 import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import GlossyIcon, { GlossyIconInline } from "@/components/ui/GlossyIcon";
+import type { IconName } from "@/components/ui/GlossyIcon";
 
-type NavItem = { href: string; label: string; hint?: string };
+type NavItem = { href: string; label: string; hint?: string; icon: IconName };
 
 function cx(...xs: Array<string | false | null | undefined>) {
   return xs.filter(Boolean).join(" ");
-}
-
-function Card(props: { title: string; children: React.ReactNode; right?: React.ReactNode }) {
-  return (
-    <div className="rounded-3xl border border-white/15 bg-white/8 shadow-[0_0_0_1px_rgba(255,255,255,0.02),0_20px_60px_rgba(0,0,0,0.45)] p-6">
-      <div className="flex items-center justify-between">
-        <div className="text-sm font-semibold text-white/90">{props.title}</div>
-        {props.right}
-      </div>
-      <div className="mt-3 text-sm text-white/75">{props.children}</div>
-    </div>
-  );
 }
 
 function NavList(props: { nav: NavItem[]; pathname: string | null; onNavigate?: () => void }) {
@@ -40,7 +30,10 @@ function NavList(props: { nav: NavItem[]; pathname: string | null; onNavigate?: 
             )}
           >
             <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-white/90">{n.label}</div>
+              <div className="flex items-center gap-2">
+                <GlossyIconInline name={n.icon} size={16} />
+                <div className="text-sm font-medium text-white/90">{n.label}</div>
+              </div>
               <div className="text-[10px] text-white/55 group-hover:text-white/75">{n.hint || ""}</div>
             </div>
           </Link>
@@ -56,25 +49,20 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
 
   const nav: NavItem[] = useMemo(
     () => [
-      { href: "/admin", label: "Dashboard", hint: "Overview" },
-      { href: "/admin/projects", label: "Projects", hint: "Your sites" },
-      { href: "/admin/agents", label: "Agents", hint: "Runs & Bundles" },
-      { href: "/admin/domains", label: "Domains", hint: "Custom domains" },
-      { href: "/admin/billing", label: "Billing", hint: "Plans & Stripe" },
-      { href: "/admin/settings", label: "Settings", hint: "Workspace" },
+      { href: "/admin", label: "Dashboard", hint: "Overview", icon: "zap" },
+      { href: "/admin/projects", label: "Projects", hint: "Your sites", icon: "layers" },
+      { href: "/admin/agents", label: "Agents", hint: "Runs & Bundles", icon: "cpu" },
+      { href: "/admin/domains", label: "Domains", hint: "Custom domains", icon: "globe" },
+      { href: "/admin/billing", label: "Billing", hint: "Plans & Stripe", icon: "credit-card" },
+      { href: "/admin/settings", label: "Settings", hint: "Workspace", icon: "settings" },
     ],
     []
   );
 
   return (
     <div className="min-h-screen text-white">
-      {/* Base background (cleaner) */}
       <div className="fixed inset-0 -z-10 bg-[#050712]" />
-
-      {/* Softer + cleaner glow (no washout) */}
       <div className="fixed inset-0 -z-10 pointer-events-none opacity-18 [background:radial-gradient(900px_circle_at_18%_12%,rgba(168,85,247,0.22),transparent_55%),radial-gradient(900px_circle_at_82%_18%,rgba(59,130,246,0.18),transparent_58%),radial-gradient(900px_circle_at_50%_86%,rgba(245,158,11,0.10),transparent_60%)]" />
-
-      {/* Subtle vignette for depth */}
       <div className="fixed inset-0 -z-10 pointer-events-none opacity-70 [background:radial-gradient(1200px_circle_at_50%_40%,transparent_35%,rgba(0,0,0,0.65)_80%)]" />
 
       {/* Mobile drawer */}
@@ -87,9 +75,12 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
           />
           <div className="absolute left-0 top-0 h-full w-[86%] max-w-[340px] border-r border-white/15 bg-black/70 backdrop-blur-xl p-4">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-semibold tracking-wide text-white/95">Dominat8</div>
-                <div className="text-xs text-white/70">Admin Console</div>
+              <div className="flex items-center gap-2">
+                <GlossyIcon name="zap" size={28} />
+                <div>
+                  <div className="text-sm font-semibold tracking-wide text-white/95">Dominat8</div>
+                  <div className="text-xs text-white/70">Admin Console</div>
+                </div>
               </div>
               <button
                 className="rounded-xl border border-white/15 bg-white/8 px-3 py-2 text-xs text-white/90 hover:bg-white/12"
@@ -97,30 +88,6 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
               >
                 Close
               </button>
-            </div>
-
-            <div className="mt-4">
-              <Card
-                title="Quick actions"
-                right={<span className="text-[10px] text-white/60">v1</span>}
-              >
-                <div className="mt-1 flex flex-col gap-2">
-                  <Link
-                    href="/admin/projects"
-                    onClick={() => setOpen(false)}
-                    className="rounded-xl border border-white/12 bg-white/6 px-3 py-2 text-xs text-white/90 hover:bg-white/10"
-                  >
-                    View Projects →
-                  </Link>
-                  <Link
-                    href="/admin/agents"
-                    onClick={() => setOpen(false)}
-                    className="rounded-xl border border-white/12 bg-white/6 px-3 py-2 text-xs text-white/90 hover:bg-white/10"
-                  >
-                    Agents & Bundles →
-                  </Link>
-                </div>
-              </Card>
             </div>
 
             <div className="mt-4">
@@ -138,32 +105,16 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
         <aside className="hidden lg:flex lg:w-[300px] lg:flex-col lg:gap-4 lg:border-r lg:border-white/12 lg:bg-black/35 lg:backdrop-blur-xl">
           <div className="p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm font-semibold tracking-wide text-white/95">Dominat8</div>
-                <div className="text-xs text-white/70">Admin Console</div>
+              <div className="flex items-center gap-2">
+                <GlossyIcon name="zap" size={32} />
+                <div>
+                  <div className="text-sm font-semibold tracking-wide text-white/95">Dominat8</div>
+                  <div className="text-xs text-white/70">Admin Console</div>
+                </div>
               </div>
               <span className="rounded-full border border-white/15 bg-white/8 px-2 py-1 text-[10px] text-white/80">
                 v1
               </span>
-            </div>
-
-            <div className="mt-5">
-              <Card title="Quick actions">
-                <div className="mt-1 flex flex-col gap-2">
-                  <Link
-                    href="/admin/projects"
-                    className="rounded-xl border border-white/12 bg-white/6 px-3 py-2 text-xs text-white/90 hover:bg-white/10"
-                  >
-                    View Projects →
-                  </Link>
-                  <Link
-                    href="/admin/agents"
-                    className="rounded-xl border border-white/12 bg-white/6 px-3 py-2 text-xs text-white/90 hover:bg-white/10"
-                  >
-                    Agents & Bundles →
-                  </Link>
-                </div>
-              </Card>
             </div>
           </div>
 
@@ -173,7 +124,9 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
             </div>
             <NavList nav={nav} pathname={pathname} />
             <div className="mt-6 rounded-2xl border border-white/12 bg-white/6 p-4">
-              <div className="text-xs font-semibold text-white/90">Status</div>
+              <div className="text-xs font-semibold text-white/90" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <GlossyIconInline name="shield" size={14} /> Status
+              </div>
               <div className="mt-2 text-[11px] text-white/70">High-contrast mode enabled.</div>
               <div className="mt-3 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-400/90" />
@@ -192,12 +145,14 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
                   className="lg:hidden rounded-2xl border border-white/15 bg-white/8 px-3 py-2 text-xs text-white/90 hover:bg-white/12"
                   onClick={() => setOpen(true)}
                   aria-label="Open menu"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
                 >
+                  <GlossyIconInline name="layers" size={14} />
                   Menu
                 </button>
 
-                <div className="hidden sm:grid h-9 w-9 rounded-2xl border border-white/12 bg-white/8 place-items-center">
-                  <span className="text-xs font-semibold text-white/90">D8</span>
+                <div className="hidden sm:block">
+                  <GlossyIcon name="zap" size={36} />
                 </div>
 
                 <div>
@@ -210,13 +165,17 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
                 <Link
                   href="/"
                   className="rounded-xl border border-white/15 bg-white/8 px-3 py-2 text-xs text-white/90 hover:bg-white/12"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
                 >
-                  View Marketing →
+                  <GlossyIconInline name="eye" size={14} />
+                  View Site
                 </Link>
                 <Link
                   href="/admin/settings"
                   className="rounded-xl border border-white/12 bg-white/6 px-3 py-2 text-xs text-white/90 hover:bg-white/10"
+                  style={{ display: "inline-flex", alignItems: "center", gap: 6 }}
                 >
+                  <GlossyIconInline name="settings" size={14} />
                   Settings
                 </Link>
               </div>
@@ -228,8 +187,9 @@ export default function AdminShellClient(props: { children: React.ReactNode; bui
 
           {/* Footer stamp */}
           <div className="mx-auto max-w-6xl px-4 pb-10">
-            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-[11px] text-white/70">
-              BUILD_STAMP: <span className="font-mono text-white/85">ADMIN_UI_CONTRAST_20260127_193346</span>
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4 text-[11px] text-white/70" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <GlossyIconInline name="code" size={12} />
+              BUILD_STAMP: <span className="font-mono text-white/85">{props.buildStamp}</span>
             </div>
           </div>
         </main>

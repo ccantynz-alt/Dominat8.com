@@ -1,0 +1,60 @@
+name: D8 Staging (branch -> Vercel Preview)
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - master
+  workflow_dispatch: {}
+
+concurrency:
+  group: d8-staging-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  preview_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build gate
+        continue-on-error: true
+        run: npm run build
+
+      - name: Install Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Pull Vercel env (preview)
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy (preview / staging)
+        id: deploy
+        run: |
+          URL=$(vercel deploy --yes --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "## Staging Preview" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Branch: \`${{ github.ref_name }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Preview URL: $URL" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Print preview URL
+        run: |
+          echo "=========================================="
+          echo "  STAGING PREVIEW URL:"
+          echo "  ${{ steps.deploy.outputs.preview_url }}"
+          echo "=========================================="

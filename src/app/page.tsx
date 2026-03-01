@@ -1,15 +1,25 @@
-// === D8_AUTOREPAIR_DEMO_START ===
-// Intentionally missing import to demonstrate Auto Repair fixing a build.
-// This produces a deterministic "Module not found" error with zero UI impact.
-import AutoRepairDemoWidget from "./_client/AutoRepairDemoWidget";
-// === D8_AUTOREPAIR_DEMO_END ===
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+import GlossyIcon, { GlossyIconInline } from "@/components/ui/GlossyIcon";
+import Link from "next/link";
+
+const features = [
+  { icon: "bolt" as const, title: "AI-Powered Generation", desc: "Describe your business. Get a full site spec, pages, and copy — generated in minutes, not weeks." },
+  { icon: "target" as const, title: "Conversion-First Design", desc: "Every section is engineered for action: hero, trust strip, features, proof, pricing, CTA ladder." },
+  { icon: "layers" as const, title: "Premium Templates", desc: "Start with proven layouts for SaaS, local service, portfolio, agency, product landing, and more." },
+  { icon: "globe" as const, title: "Publish & Map Domains", desc: "Ship to your custom domain with one click. SSL provisioned, DNS verified, live in seconds." },
+  { icon: "cpu" as const, title: "Agent-Driven Pipeline", desc: "Automated agents handle SEO, metadata, sitemap, robots.txt, and ongoing optimization passes." },
+  { icon: "shield" as const, title: "Build-Gated Deploys", desc: "Nothing ships unless the build is green. No silent failures, no broken production." },
+];
+
+const steps = [
+  { num: "01", icon: "sparkle" as const, title: "Describe your idea", desc: "Enter a brief about your business. The AI generates a full site spec with pages, sections, and copy." },
+  { num: "02", icon: "code" as const, title: "Review & refine", desc: "Preview your generated site. Swap sections, edit copy, reorder — iterate until it's perfect." },
+  { num: "03", icon: "rocket" as const, title: "Publish & grow", desc: "Ship to your domain. Run SEO passes. Track performance. Scale with confidence." },
+];
+
 export default function HomePage() {
-  // D8: Keep this intentionally simple and robust.
-  // The real "locked hero" visuals live in the rendered markup below
-  // (inline styles so it can't go plain if Tailwind fails).
   return (
     <main
       style={{
@@ -25,6 +35,7 @@ export default function HomePage() {
       }}
     >
       <div style={{ width: "100%", maxWidth: 1160, margin: "0 auto" }}>
+        {/* NAV */}
         <div
           style={{
             display: "flex",
@@ -34,7 +45,7 @@ export default function HomePage() {
             padding: "10px 0 22px",
           }}
         >
-          <a
+          <Link
             href="/"
             aria-label="Dominat8 Home"
             style={{
@@ -45,18 +56,7 @@ export default function HomePage() {
               color: "#F3EEFF",
             }}
           >
-            <div
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: 12,
-                background:
-                  "linear-gradient(135deg, rgba(168,85,247,0.95), rgba(59,130,246,0.75))",
-                boxShadow:
-                  "0 10px 30px rgba(168,85,247,0.25), 0 10px 30px rgba(59,130,246,0.12)",
-                border: "1px solid rgba(255,255,255,0.18)",
-              }}
-            />
+            <GlossyIcon name="zap" size={34} />
             <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.05 }}>
               <div
                 style={{
@@ -73,7 +73,7 @@ export default function HomePage() {
                 AI website builder for conversion-first sites
               </div>
             </div>
-          </a>
+          </Link>
 
           <nav
             aria-label="Top navigation"
@@ -86,29 +86,34 @@ export default function HomePage() {
             }}
           >
             {[
-              { href: "#preview", label: "Preview" },
-              { href: "/templates", label: "Templates" },
-              { href: "/pricing", label: "Pricing" },
+              { href: "/templates", label: "Templates", icon: "layers" as const },
+              { href: "/pricing", label: "Pricing", icon: "credit-card" as const },
+              { href: "/gallery", label: "Gallery", icon: "eye" as const },
             ].map((l) => (
-              <a
+              <Link
                 key={l.href}
                 href={l.href}
                 style={{
                   fontSize: 13,
                   color: "rgba(237,234,247,0.82)",
                   textDecoration: "none",
-                  padding: "8px 10px",
+                  padding: "8px 12px",
                   borderRadius: 10,
                   border: "1px solid rgba(255,255,255,0.08)",
                   background: "rgba(255,255,255,0.03)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
                 }}
               >
+                <GlossyIconInline name={l.icon} size={14} />
                 {l.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>
 
+        {/* HERO */}
         <div
           style={{
             display: "grid",
@@ -124,7 +129,7 @@ export default function HomePage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 10,
-                padding: "8px 12px",
+                padding: "8px 14px",
                 borderRadius: 999,
                 background:
                   "linear-gradient(90deg, rgba(168,85,247,0.18), rgba(59,130,246,0.10))",
@@ -137,8 +142,8 @@ export default function HomePage() {
                 fontWeight: 700,
               }}
             >
-              <span style={{ opacity: 0.95 }}>Craftify-style hero</span>
-              <span style={{ opacity: 0.65 }}>inline-styled fallback</span>
+              <GlossyIconInline name="sparkle" size={14} />
+              <span style={{ opacity: 0.95 }}>AI-Powered Website Factory</span>
             </div>
 
             <h1
@@ -176,19 +181,19 @@ export default function HomePage() {
                 color: "rgba(237,234,247,0.78)",
               }}
             >
-              Dominat8 builds polished, conversion-first pages fast — with a locked visual layer that
-              still renders properly even if Tailwind/classes fail to load.
+              Dominat8 builds polished, conversion-first pages fast — with AI agents that handle
+              generation, SEO, and publishing so you can focus on growing.
             </p>
 
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 18, alignItems: "center" }}>
-              <a
-                href="/builder"
+              <Link
+                href="/templates"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 10,
-                  padding: "12px 16px",
+                  padding: "12px 18px",
                   borderRadius: 14,
                   textDecoration: "none",
                   fontWeight: 800,
@@ -201,17 +206,17 @@ export default function HomePage() {
                   border: "1px solid rgba(255,255,255,0.10)",
                 }}
               >
-                Start Building Now <span aria-hidden="true">→</span>
-              </a>
+                <GlossyIconInline name="rocket" size={16} /> Start Building Now
+              </Link>
 
-              <a
-                href="#preview"
+              <Link
+                href="/pricing"
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 10,
-                  padding: "12px 16px",
+                  padding: "12px 18px",
                   borderRadius: 14,
                   textDecoration: "none",
                   fontWeight: 800,
@@ -222,11 +227,12 @@ export default function HomePage() {
                   boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
                 }}
               >
-                Watch video <span aria-hidden="true">▶</span>
-              </a>
+                <GlossyIconInline name="credit-card" size={16} /> View Pricing
+              </Link>
             </div>
           </section>
 
+          {/* PREVIEW CARD */}
           <aside
             id="preview"
             aria-label="Preview card"
@@ -255,9 +261,13 @@ export default function HomePage() {
             />
             <div style={{ position: "relative", zIndex: 2 }}>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                {["LIVE_OK", "BUILD PROOF", "NO-TAILWIND SAFE"].map((t) => (
+                {[
+                  { label: "AI GENERATED", icon: "cpu" as const },
+                  { label: "SEO READY", icon: "chart" as const },
+                  { label: "CONVERSION FIRST", icon: "target" as const },
+                ].map((t) => (
                   <div
-                    key={t}
+                    key={t.label}
                     style={{
                       fontSize: 11,
                       fontWeight: 900,
@@ -268,9 +278,13 @@ export default function HomePage() {
                       background: "rgba(0,0,0,0.35)",
                       border: "1px solid rgba(255,255,255,0.12)",
                       color: "rgba(237,234,247,0.85)",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
                     }}
                   >
-                    {t}
+                    <GlossyIconInline name={t.icon} size={12} />
+                    {t.label}
                   </div>
                 ))}
               </div>
@@ -283,9 +297,13 @@ export default function HomePage() {
                   letterSpacing: "0.14em",
                   textTransform: "uppercase",
                   color: "rgba(237,234,247,0.84)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
-                Live Preview (Proof)
+                <GlossyIcon name="eye" size={28} />
+                Live Preview
               </div>
 
               <div
@@ -337,22 +355,200 @@ export default function HomePage() {
                     color: "rgba(237,234,247,0.80)",
                   }}
                 >
-                  <div style={{ marginBottom: 10, fontWeight: 900, opacity: 0.95 }}>
-                    HOME_OK • Locked Hero Render
+                  <div style={{ marginBottom: 10, fontWeight: 900, opacity: 0.95, display: "flex", alignItems: "center", gap: 6 }}>
+                    <GlossyIconInline name="check" size={14} />
+                    BUILD OK — Site Generated
                   </div>
                   <div style={{ opacity: 0.7 }}>
-                    If you see this card styled, your homepage can’t “go plain” anymore.
+                    Your premium site is live and conversion-ready.
                   </div>
                 </div>
               </div>
 
-              <div style={{ marginTop: 14, fontSize: 13, lineHeight: 1.5, color: "rgba(237,234,247,0.72)" }}>
-                Tip: add <span style={{ fontWeight: 900, color: "rgba(237,234,247,0.90)" }}>?ts=</span> to bust cache.
+              <div style={{ marginTop: 14, fontSize: 13, lineHeight: 1.5, color: "rgba(237,234,247,0.72)", display: "flex", alignItems: "center", gap: 6 }}>
+                <GlossyIconInline name="bolt" size={14} />
+                Powered by AI agents — generation to publish in minutes.
               </div>
             </div>
           </aside>
         </div>
 
+        {/* FEATURES GRID */}
+        <section style={{ marginTop: 48 }}>
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 14px",
+                borderRadius: 999,
+                background: "linear-gradient(90deg, rgba(168,85,247,0.15), rgba(59,130,246,0.08))",
+                border: "1px solid rgba(255,255,255,0.10)",
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "rgba(237,234,247,0.85)",
+              }}
+            >
+              <GlossyIconInline name="star" size={14} />
+              Why Dominat8
+            </div>
+            <h2
+              style={{
+                marginTop: 14,
+                fontSize: 32,
+                fontWeight: 900,
+                letterSpacing: "-0.02em",
+                color: "#F6F2FF",
+              }}
+            >
+              Everything you need to ship premium sites
+            </h2>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            {features.map((f) => (
+              <div
+                key={f.title}
+                style={{
+                  borderRadius: 18,
+                  padding: 20,
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  boxShadow: "0 18px 55px rgba(0,0,0,0.35)",
+                }}
+              >
+                <GlossyIcon name={f.icon} size={44} />
+                <div style={{ marginTop: 14, fontSize: 15, fontWeight: 800, color: "rgba(237,234,247,0.95)" }}>{f.title}</div>
+                <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "rgba(237,234,247,0.68)" }}>{f.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* HOW IT WORKS */}
+        <section style={{ marginTop: 48 }}>
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "8px 14px",
+                borderRadius: 999,
+                background: "linear-gradient(90deg, rgba(59,130,246,0.15), rgba(168,85,247,0.08))",
+                border: "1px solid rgba(255,255,255,0.10)",
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "rgba(237,234,247,0.85)",
+              }}
+            >
+              <GlossyIconInline name="zap" size={14} />
+              How It Works
+            </div>
+            <h2
+              style={{
+                marginTop: 14,
+                fontSize: 32,
+                fontWeight: 900,
+                letterSpacing: "-0.02em",
+                color: "#F6F2FF",
+              }}
+            >
+              Three steps to a premium website
+            </h2>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+            {steps.map((s) => (
+              <div
+                key={s.num}
+                style={{
+                  borderRadius: 18,
+                  padding: 22,
+                  background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  boxShadow: "0 18px 55px rgba(0,0,0,0.35)",
+                  position: "relative",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <GlossyIcon name={s.icon} size={44} />
+                  <div style={{ fontSize: 28, fontWeight: 900, color: "rgba(168,85,247,0.25)" }}>{s.num}</div>
+                </div>
+                <div style={{ marginTop: 14, fontSize: 15, fontWeight: 800, color: "rgba(237,234,247,0.95)" }}>{s.title}</div>
+                <div style={{ marginTop: 8, fontSize: 13, lineHeight: 1.55, color: "rgba(237,234,247,0.68)" }}>{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* CTA SECTION */}
+        <section
+          style={{
+            marginTop: 48,
+            borderRadius: 24,
+            padding: 32,
+            background: "linear-gradient(135deg, rgba(168,85,247,0.12), rgba(59,130,246,0.08))",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 30px 90px rgba(0,0,0,0.3), 0 20px 55px rgba(168,85,247,0.08)",
+            textAlign: "center",
+          }}
+        >
+          <GlossyIcon name="rocket" size={56} style={{ margin: "0 auto" }} />
+          <h2 style={{ marginTop: 16, fontSize: 28, fontWeight: 900, color: "#F6F2FF" }}>
+            Ready to build something premium?
+          </h2>
+          <p style={{ marginTop: 10, fontSize: 15, color: "rgba(237,234,247,0.72)", maxWidth: 500, margin: "10px auto 0" }}>
+            Start free. Generate your first site in minutes. Upgrade when you want full automation.
+          </p>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 20 }}>
+            <Link
+              href="/templates"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "12px 20px",
+                borderRadius: 14,
+                textDecoration: "none",
+                fontWeight: 800,
+                fontSize: 14,
+                color: "#07070B",
+                background: "linear-gradient(90deg, rgba(168,85,247,1), rgba(59,130,246,1))",
+                boxShadow: "0 18px 55px rgba(168,85,247,0.26), 0 10px 24px rgba(59,130,246,0.16)",
+                border: "1px solid rgba(255,255,255,0.10)",
+              }}
+            >
+              <GlossyIconInline name="bolt" size={16} /> Get Started Free
+            </Link>
+            <Link
+              href="/contact"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "12px 20px",
+                borderRadius: 14,
+                textDecoration: "none",
+                fontWeight: 800,
+                fontSize: 14,
+                color: "rgba(237,234,247,0.88)",
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.12)",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+              }}
+            >
+              <GlossyIconInline name="mail" size={16} /> Talk to Us
+            </Link>
+          </div>
+        </section>
+
+        {/* FOOTER */}
         <div
           style={{
             marginTop: 34,
@@ -366,14 +562,18 @@ export default function HomePage() {
             color: "rgba(237,234,247,0.65)",
           }}
         >
-          <div>© {new Date().getFullYear()} Dominat8</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <GlossyIconInline name="zap" size={12} />
+            &copy; {new Date().getFullYear()} Dominat8
+          </div>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
             {[
               { href: "/privacy", label: "Privacy" },
               { href: "/terms", label: "Terms" },
               { href: "/contact", label: "Contact" },
+              { href: "/about", label: "About" },
             ].map((l) => (
-              <a
+              <Link
                 key={l.href}
                 href={l.href}
                 style={{
@@ -384,7 +584,7 @@ export default function HomePage() {
                 }}
               >
                 {l.label}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -392,4 +592,3 @@ export default function HomePage() {
     </main>
   );
 }
-

@@ -1,7 +1,6 @@
-﻿"use client";
-
 import React from "react";
 import Link from "next/link";
+import GlossyIcon, { GlossyIconInline } from "@/components/ui/GlossyIcon";
 
 type Project = {
   id: string;
@@ -11,90 +10,86 @@ type Project = {
 };
 
 async function fetchProjects(): Promise<Project[]> {
-  // NOTE: This is a placeholder. Keep existing data-loading logic if present in your project.
-  // If your app uses a hook or server action, you can integrate it here.
-  // For now, return an empty array to demonstrate empty state handling.
   return [];
 }
 
 export default async function AdminProjectsPage() {
   const projects = await fetchProjects();
-
   const hasProjects = Array.isArray(projects) && projects.length > 0;
 
   if (!hasProjects) {
     return (
-      <div className="p-6">
-        <div className="mx-auto max-w-3xl rounded-lg border border-gray-200 bg-white p-8 text-center shadow-sm">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-            <svg className="h-6 w-6 text-gray-500" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M7 7h10M7 12h10M7 17h6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+      <div className="space-y-6">
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <GlossyIcon name="layers" size={36} />
+          <div>
+            <div className="text-xs font-semibold tracking-wide text-white/60">PROJECTS</div>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Projects</h1>
           </div>
-          <h1 className="text-lg font-semibold text-gray-900">No projects yet</h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Get started by creating your first project. You can add details and manage everything from here.
+        </div>
+
+        <div className="rounded-3xl border border-white/10 bg-black/30 p-8 text-center">
+          <GlossyIcon name="layers" size={48} style={{ margin: "0 auto" }} />
+          <h2 className="mt-4 text-lg font-semibold">No projects yet</h2>
+          <p className="mt-2 text-sm text-white/60">
+            Get started by creating your first project. Generate a site from a template and manage everything here.
           </p>
-          <div className="mt-6">
-            <Link
-              href="/admin/projects/new"
-              className="inline-flex items-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-            >
-              Create project
-            </Link>
-          </div>
+          <Link
+            href="/templates"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/15"
+          >
+            <GlossyIconInline name="rocket" size={16} />
+            Create project
+          </Link>
         </div>
       </div>
     );
   }
 
-  // Existing list/table UI remains unchanged below.
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-gray-900">Projects</h1>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <GlossyIcon name="layers" size={36} />
+          <div>
+            <div className="text-xs font-semibold tracking-wide text-white/60">PROJECTS</div>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Projects</h1>
+          </div>
+        </div>
         <Link
-          href="/admin/projects/new"
-          className="inline-flex items-center rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+          href="/templates"
+          className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/15"
         >
+          <GlossyIconInline name="rocket" size={16} />
           New project
         </Link>
       </div>
 
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Name
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Description
-              </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                Created
-              </th>
-              <th scope="col" className="px-6 py-3" />
+      <div className="rounded-3xl border border-white/10 bg-black/30 overflow-hidden">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-white/10">
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/50">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/50">Description</th>
+              <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white/50">Created</th>
+              <th className="px-6 py-3" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
+          <tbody>
             {projects.map((p) => (
-              <tr key={p.id}>
-                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">{p.name}</td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {p.description ?? <span className="text-gray-400">â€”</span>}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-600">
-                  {p.createdAt
-                    ? new Date(p.createdAt).toLocaleDateString()
-                    : <span className="text-gray-400">â€”</span>}
+              <tr key={p.id} className="border-b border-white/5">
+                <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">{p.name}</td>
+                <td className="px-6 py-4 text-sm text-white/60">{p.description ?? "—"}</td>
+                <td className="px-6 py-4 text-sm text-white/60">
+                  {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "—"}
                 </td>
                 <td className="px-6 py-4 text-right">
                   <Link
                     href={`/admin/projects/${p.id}`}
-                    className="text-sm font-medium text-black hover:underline"
+                    className="text-sm font-medium hover:underline"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
                   >
-                    Manage
+                    <GlossyIconInline name="arrow-right" size={12} /> Manage
                   </Link>
                 </td>
               </tr>

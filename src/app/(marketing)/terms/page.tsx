@@ -1,52 +1,102 @@
-import Link from "next/link";
-import { D8Section } from "../_d8/D8Section";
-import { D8Card } from "../_d8/D8Bits";
+import GlossyPageShell, { GlossyPageHeader } from "@/components/ui/GlossyPageShell";
+import GlossyIcon, { GlossyIconInline } from "@/components/ui/GlossyIcon";
 
-export default function Page() {
+export const metadata = {
+  title: "Terms of Service — Dominat8",
+  description: "Terms and conditions for using Dominat8.",
+};
+
+const sections = [
+  {
+    icon: "document" as const,
+    title: "Acceptance of Terms",
+    body: "By accessing or using Dominat8, you agree to be bound by these terms. If you don't agree, please don't use the service. We may update these terms from time to time.",
+  },
+  {
+    icon: "cpu" as const,
+    title: "Service Description",
+    body: "Dominat8 is an AI-powered website generation and publishing platform. We provide tools to generate, customize, and deploy websites. The AI generates content based on your inputs.",
+  },
+  {
+    icon: "users" as const,
+    title: "Your Account",
+    body: "You're responsible for maintaining the security of your account and all activities under it. Keep your credentials safe. Notify us immediately if you suspect unauthorized access.",
+  },
+  {
+    icon: "layers" as const,
+    title: "Content & Ownership",
+    body: "You retain ownership of the content you create. By using our service, you grant us a limited license to host and display your content as needed to provide the service.",
+  },
+  {
+    icon: "credit-card" as const,
+    title: "Billing & Payments",
+    body: "Paid plans are billed as described at purchase. You can cancel anytime. Refunds are handled on a case-by-case basis. Stripe handles all payment processing securely.",
+  },
+  {
+    icon: "shield" as const,
+    title: "Acceptable Use",
+    body: "Don't use Dominat8 for illegal activities, spam, or content that violates others' rights. We reserve the right to suspend accounts that violate these terms.",
+  },
+  {
+    icon: "lock" as const,
+    title: "Limitation of Liability",
+    body: "Dominat8 is provided 'as is.' We do our best to keep it running and secure, but we can't guarantee uninterrupted service or be liable for indirect damages.",
+  },
+  {
+    icon: "mail" as const,
+    title: "Contact",
+    body: "For questions about these terms, contact us at support@dominat8.com. We're here to help clarify anything.",
+  },
+];
+
+export default function TermsPage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "radial-gradient(1200px 800px at 65% 5%, rgba(168,85,247,0.20), rgba(0,0,0,0) 60%), radial-gradient(900px 700px at 15% 20%, rgba(59,130,246,0.12), rgba(0,0,0,0) 62%), linear-gradient(180deg, #07070B 0%, #07070B 40%, #05050A 100%)",
-        color: "#EDEAF7",
-        fontFamily:
-          "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'",
-        padding: "28px 16px 56px",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 1160, margin: "0 auto" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "10px 0 18px" }}>
-          <Link href="/" style={{ color: "rgba(243,238,255,0.95)", textDecoration: "none", fontWeight: 900, letterSpacing: "0.14em", textTransform: "uppercase", fontSize: 12 }}>
-            Dominat8
-          </Link>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <Link href="/templates" style={{ color: "rgba(237,234,247,0.82)", textDecoration: "none", padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", fontSize: 13 }}>
-              Templates
-            </Link>
-            <Link href="/pricing" style={{ color: "rgba(237,234,247,0.82)", textDecoration: "none", padding: "8px 10px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", fontSize: 13 }}>
-              Pricing
-            </Link>
-          </div>
-        </div>
+    <GlossyPageShell>
+      <GlossyPageHeader
+        icon="document"
+        eyebrow="Legal"
+        title="Terms of Service"
+        subtitle="Clear, readable terms with consistent hierarchy. No lawyer-speak."
+      />
 
-        <D8Section eyebrow="Premium SaaS" title="Terms" lead="Clear, readable terms with consistent spacing and hierarchy." tone="glass">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 12 }}>
-            <D8Card title="Consistent sections" body="Premium framing and hierarchy across marketing pages." kicker="SYSTEM" />
-            <D8Card title="Inline-safe" body="Core content renders intentionally even if utility classes fail." kicker="LOCKED" />
-            <D8Card title="Conversion-first" body="Clear CTAs and predictable page rhythm." kicker="CONVERT" />
+      <div style={{ display: "grid", gap: 14 }}>
+        {sections.map((s) => (
+          <div
+            key={s.title}
+            style={{
+              borderRadius: 18,
+              padding: 22,
+              background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
+              border: "1px solid rgba(255,255,255,0.10)",
+              boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <GlossyIcon name={s.icon} size={34} />
+              <div style={{ fontSize: 15, fontWeight: 800, color: "rgba(237,234,247,0.95)" }}>{s.title}</div>
+            </div>
+            <p style={{ marginTop: 10, fontSize: 14, lineHeight: 1.65, color: "rgba(237,234,247,0.68)" }}>{s.body}</p>
           </div>
-        </D8Section>
-
-        <div style={{ marginTop: 34, opacity: 0.85, fontSize: 12, color: "rgba(237,234,247,0.65)", display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-          <div>© 2026 Dominat8</div>
-          <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-            <Link href="/privacy" style={{ color: "rgba(237,234,247,0.70)", textDecoration: "none", borderBottom: "1px solid rgba(237,234,247,0.20)", paddingBottom: 2 }}>Privacy</Link>
-            <Link href="/terms" style={{ color: "rgba(237,234,247,0.70)", textDecoration: "none", borderBottom: "1px solid rgba(237,234,247,0.20)", paddingBottom: 2 }}>Terms</Link>
-            <Link href="/contact" style={{ color: "rgba(237,234,247,0.70)", textDecoration: "none", borderBottom: "1px solid rgba(237,234,247,0.20)", paddingBottom: 2 }}>Contact</Link>
-          </div>
-        </div>
+        ))}
       </div>
-    </main>
+
+      <div
+        style={{
+          marginTop: 24,
+          borderRadius: 16,
+          padding: 18,
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          fontSize: 13,
+          color: "rgba(237,234,247,0.55)",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <GlossyIconInline name="clock" size={14} />
+        Last updated: February 2026
+      </div>
+    </GlossyPageShell>
   );
 }
