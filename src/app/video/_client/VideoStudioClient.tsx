@@ -167,7 +167,7 @@ export default function VideoStudioClient() {
 
     const durations = shots.map(s => Math.max(2, Math.min(12, Math.floor(s.durationSec || 6))));
     let t0 = performance.now();
-    const ctx2 = ctx;
+    const validCtx = ctx;
 
     function tick() {
       const elapsed = (performance.now() - t0) / 1000;
@@ -179,7 +179,7 @@ export default function VideoStudioClient() {
       }
       if (idx >= durations.length) {
         setActiveIndex(durations.length - 1);
-        drawFrame(ctx2, w, h, shots[durations.length - 1], 1);
+        drawFrame(validCtx, w, h, shots[durations.length - 1], 1);
         stopAnimation();
         if (previewOnly) setStatus("ready");
         return;
@@ -187,7 +187,7 @@ export default function VideoStudioClient() {
       setActiveIndex(idx);
       const local = elapsed - acc;
       const p = Math.max(0, Math.min(1, local / durations[idx]));
-      drawFrame(ctx2, w, h, shots[idx], p);
+      drawFrame(validCtx, w, h, shots[idx], p);
       rafRef.current = requestAnimationFrame(tick);
     }
 
