@@ -23,5 +23,6 @@
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": [
     "src/_app_backup/**",
-"node_modules"]
+    "_archive/**",
+    "node_modules"]
 }
