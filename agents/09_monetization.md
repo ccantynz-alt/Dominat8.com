@@ -1,1 +1,0 @@
-Monetization: pricing model, gating rules, Stripe flow, upgrade loops.

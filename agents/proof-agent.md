@@ -1,1 +1,0 @@
-Proof Agent: gallery, examples, trust

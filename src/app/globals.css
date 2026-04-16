@@ -1,227 +1,90 @@
 @import "tailwindcss";
 
 /* ============================================================
-   DOMINAT8 — Global Design System
-   Accent: Toxic Green #00ff41
-   Background: Near-black #0a0a0a
-   Typography: Space Grotesk 900
+   Dominat8 design system
+   Professional, confident, sleek. Dark-mode first.
+   Accent: d8-green #00ff88 (softer than toxic neon for broader appeal).
    ============================================================ */
 
 @theme {
-  --color-d8-black: #0a0a0a;
-  --color-d8-darker: #050505;
-  --color-d8-surface: #111111;
-  --color-d8-surface-hover: #1a1a1a;
-  --color-d8-border: rgba(255, 255, 255, 0.08);
-  --color-d8-border-hover: rgba(0, 255, 65, 0.25);
-  --color-d8-green: #00ff41;
-  --color-d8-green-dim: rgba(0, 255, 65, 0.15);
-  --color-d8-green-glow: rgba(0, 255, 65, 0.4);
-  --color-d8-text: #ededed;
-  --color-d8-muted: rgba(237, 237, 237, 0.55);
-  --color-d8-white: #ffffff;
+  --color-bg: #0a0a0b;
+  --color-bg-2: #0f1012;
+  --color-bg-3: #161719;
+  --color-line: rgba(255, 255, 255, 0.08);
+  --color-line-strong: rgba(255, 255, 255, 0.14);
+  --color-fg: #ededef;
+  --color-fg-2: rgba(237, 237, 239, 0.72);
+  --color-fg-3: rgba(237, 237, 239, 0.52);
+  --color-accent: #00ff88;
+  --color-accent-soft: rgba(0, 255, 136, 0.14);
+  --color-accent-glow: rgba(0, 255, 136, 0.35);
 
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "Fira Code", monospace;
+  --font-display:
+    "Inter", "InterVariable", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-body:
+    "Inter", "InterVariable", ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
 }
 
-/* ---- Base resets ---- */
+/* Base */
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  background: var(--color-d8-black);
-  color: var(--color-d8-text);
+  background: var(--color-bg);
+  color: var(--color-fg);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: rgba(0, 255, 65, 0.3);
-  color: #fff;
+  background: var(--color-accent-soft);
+  color: var(--color-fg);
 }
 
-/* ---- Glitch text animation ---- */
-@keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-  100% { transform: translate(0); }
+/* Focus ring — accessible */
+:where(a, button, [role="button"]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
-@keyframes glitch-skew {
-  0% { transform: skew(0deg); }
-  20% { transform: skew(-1deg); }
-  40% { transform: skew(0.5deg); }
-  60% { transform: skew(-0.5deg); }
-  80% { transform: skew(1deg); }
-  100% { transform: skew(0deg); }
-}
-
-.glitch-text {
-  position: relative;
-  animation: glitch-skew 4s ease-in-out infinite alternate;
-}
-
-.glitch-text::before,
-.glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.glitch-text::before {
-  color: #00ff41;
-  animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite;
-  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-  opacity: 0.8;
-}
-
-.glitch-text::after {
-  color: #ff0022;
-  animation: glitch 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) infinite reverse;
-  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-  opacity: 0.8;
-}
-
-/* Glitch only triggers on hover for performance */
-.glitch-text::before,
-.glitch-text::after {
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-.glitch-text:hover::before,
-.glitch-text:hover::after {
-  opacity: 0.8;
-}
-
-/* ---- Animated grid background ---- */
-@keyframes grid-scroll {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(50px); }
-}
-
-.grid-bg {
-  position: absolute;
+/* Subtle grid background (site-wide, fixed) */
+.bg-grid {
+  position: fixed;
   inset: 0;
-  overflow: hidden;
+  z-index: -1;
   pointer-events: none;
-  z-index: 0;
-}
-
-.grid-bg::before {
-  content: "";
-  position: absolute;
-  inset: -50px;
   background-image:
-    linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: grid-scroll 8s linear infinite;
-}
-
-.grid-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(0, 255, 65, 0.08), transparent 70%),
-    radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 255, 65, 0.04), transparent 60%);
-  pointer-events: none;
-}
-
-/* ---- Scanline overlay ---- */
-.scanlines::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
+    linear-gradient(rgba(0, 255, 136, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(
+    ellipse 100% 60% at 50% 0%,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0) 80%
   );
-  pointer-events: none;
-  z-index: 1;
 }
 
-/* ---- Neon glow CTA ---- */
-.neon-cta {
-  position: relative;
-  background: #00ff41;
-  color: #0a0a0a;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow:
-    0 0 20px rgba(0, 255, 65, 0.3),
-    0 0 60px rgba(0, 255, 65, 0.1);
-}
-
-.neon-cta:hover {
-  box-shadow:
-    0 0 30px rgba(0, 255, 65, 0.5),
-    0 0 80px rgba(0, 255, 65, 0.2),
-    0 0 120px rgba(0, 255, 65, 0.1);
-  transform: translateY(-1px);
-}
-
-/* ---- Neon border cards ---- */
-.neon-border {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.neon-border:hover {
-  border-color: rgba(0, 255, 65, 0.3);
-  box-shadow: 0 0 30px rgba(0, 255, 65, 0.06), inset 0 0 30px rgba(0, 255, 65, 0.02);
-}
-
-/* ---- Fade-in utility ---- */
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-up {
-  animation: fade-up 0.6s ease-out both;
-}
-
-/* ---- Pulse glow for stats ---- */
-@keyframes pulse-glow {
-  0%, 100% { text-shadow: 0 0 20px rgba(0, 255, 65, 0.3); }
-  50% { text-shadow: 0 0 40px rgba(0, 255, 65, 0.6), 0 0 80px rgba(0, 255, 65, 0.2); }
-}
-
-.stat-glow {
-  color: #00ff41;
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* ---- Reduced motion ---- */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .glitch-text,
-  .glitch-text::before,
-  .glitch-text::after,
-  .grid-bg::before,
-  .stat-glow,
-  .fade-up {
-    animation: none !important;
-    transform: none !important;
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

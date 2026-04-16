@@ -1,30 +1,37 @@
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import type { Metadata } from "next";
+import { SITE } from "@/lib/site";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE.url),
   title: {
-    default: "Dominat8 — AI Marketing, Fully Automated",
-    template: "%s — Dominat8",
+    default: `${SITE.name} — ${SITE.tagline}`,
+    template: `%s — ${SITE.name}`,
   },
-  description:
-    "Upload your product. Dominat8's AI generates a full launch — copy, video, imagery, voice — across every channel and market. Live in minutes.",
-  metadataBase: new URL("https://www.dominat8.com"),
+  description: SITE.description,
+  applicationName: SITE.name,
   openGraph: {
     type: "website",
-    url: "https://www.dominat8.com",
-    siteName: "Dominat8",
-    title: "Dominat8 — AI Marketing, Fully Automated",
-    description:
-      "Upload a product. Launch a campaign across every channel and market — in minutes.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Dominat8" }],
+    url: SITE.url,
+    siteName: SITE.name,
+    title: `${SITE.name} — ${SITE.tagline}`,
+    description: SITE.description,
+    images: [{ url: SITE.ogImage, width: 1200, height: 630, alt: SITE.name }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dominat8 — AI Marketing, Fully Automated",
-    description:
-      "Upload a product. Launch a campaign across every channel and market — in minutes.",
-    images: ["/og.png"],
+    title: `${SITE.name} — ${SITE.tagline}`,
+    description: SITE.description,
+    images: [SITE.ogImage],
   },
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0b",
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -35,18 +42,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
+        <link rel="preconnect" href="https://rsms.me/" />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
-      <body className="min-h-screen bg-d8-black text-d8-text antialiased font-body">
+      <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-fg)] antialiased">
+        <div className="bg-grid" aria-hidden />
         {children}
       </body>
     </html>

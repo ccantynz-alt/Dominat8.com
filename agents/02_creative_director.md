@@ -1,1 +1,0 @@
-Creative Director: luxury spacing/typography/rhythm. Output: section blueprint + tokens + component rules.

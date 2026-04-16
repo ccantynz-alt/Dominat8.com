@@ -1,2 +1,6 @@
-Reason: Fixing CI build errors in protected paths (D8TV.tsx syntax fix, D8Card type mismatch fix).
-PR: Fix all PRs and workflows to make the system run green.
+Reason: Full nuke + clean rebuild of dominat8.com on Next.js 16 / React 19 /
+Tailwind 4, removing all legacy source, cruft, and disabled experiments. See
+commit message and branch claude/dominat8-landing-page-2DE1i for full detail.
+Touched protected paths: src/app/page.tsx, src/app/layout.tsx,
+src/app/globals.css (all rewritten from scratch).
+PR: this branch.

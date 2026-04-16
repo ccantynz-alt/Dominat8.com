@@ -1,1 +1,0 @@
-Conversion: funnel architecture + CTA placement + objection handling. Output: page flow + A/B ideas.

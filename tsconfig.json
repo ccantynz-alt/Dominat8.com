@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -11,36 +15,28 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [{ "name": "next" }],
-
-    "baseUrl": ".",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "paths": {
-      "@/*": ["./src/*", "./*"]
+      "@/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
-    "_archive",
-    ".d8_bak",
-    "._app_disabled",
-    "_app_disabled",
-    "app_disabled",
-    "disabled_projects",
-    "disabled_runs",
-    "generated",
-    "BOOTSTRAP",
-    "pages__DISABLED",
-    "agents",
-    "agent_logs",
-    "bundle_logs",
-    "seo-v2",
-    "auto-publish",
-    "upgrades",
-    "site",
-    "rc",
-    "src/_app_backup/**"
+    ".next"
   ]
 }

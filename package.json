@@ -1,37 +1,27 @@
 {
-  "name": "my-saas-app",
-  "version": "0.1.0",
+  "name": "dominat8-com",
+  "version": "1.0.0",
   "private": true,
+  "description": "Dominat8 marketing site (dominat8.com). Builder + billing live on dominat8.io.",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "preflight": "next build",
-    "ci:build": "npm run build",
-    "ci:probe": "node -e \"console.log('probe handled externally')\""
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.0.7",
-    "@vercel/blob": "^2.3.2",
-    "@vercel/kv": "^3.0.0",
-    "adm-zip": "^0.5.16",
-    "next": "^16.2.1",
+    "next": "^16.2.4",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "stripe": "^21.0.1",
-    "zod": "^4.3.6"
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/adm-zip": "^0.5.7",
     "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "autoprefixer": "^10.4.27",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "^16.2.1",
-    "postcss": "^8.5.8",
+    "eslint": "^9.38.0",
+    "eslint-config-next": "^16.2.4",
     "tailwindcss": "^4.1.18",
     "typescript": "^6.0.2"
   },
