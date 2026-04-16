@@ -1,1 +1,0 @@
-Creative Director Agent: design rules, hierarchy, polish

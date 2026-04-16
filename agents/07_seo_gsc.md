@@ -1,1 +1,0 @@
-SEO + GSC: sitemap/robots/schema/canonicals + Search Console onboarding steps.

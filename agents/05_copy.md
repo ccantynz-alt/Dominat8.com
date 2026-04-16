@@ -1,1 +1,0 @@
-Copy Chief: hero, proof, pricing copy. Output: variants + tone rules.

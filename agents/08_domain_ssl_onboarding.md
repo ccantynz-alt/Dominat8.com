@@ -1,1 +1,0 @@
-Mission: DNS + SSL provisioning on Vercel + customer guidance. Output: wizard steps + error mapping.

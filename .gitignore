@@ -1,18 +1,14 @@
-node# dependencies
+# dependencies
 node_modules
 
 # next.js
 .next
 out
+next-env.d.ts
 
 # env files
 .env
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_or_test_REPLACE_ME
-CLERK_SECRET_KEY=sk_live_or_test_REPLACE_ME
-KV_REST_API_URL=REPLACE_ME
-KV_REST_API_TOKEN=REPLACE_ME
-KV_REST_API_READ_ONLY_TOKEN=REPLACE_ME
-
+.env.local
 .env.*.local
 
 # logs
@@ -20,35 +16,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# misc
+# editor + OS
 .DS_Store
-_modules
+.idea
+.vscode
 
 # vercel
-
-.next
-
-deploy.zip
-
-
-deploy.zip
-
-
-build-output.txt
-
-# --- Dominat8 local artifacts (do not commit) ---
-package.json.bak_*
-
 .vercel
-.env*.local
-ai-saas-starter.zip
+
+# typescript incremental build cache
+*.tsbuildinfo
+
+# build artefacts
+deploy.zip
 *.zip
-
-.env.local
-
-
-downloads/
-
-# D8_PHASE1_LOCK_DEPLOY_STYLING_v1_20260128
-*.bak_*
-*.bak
