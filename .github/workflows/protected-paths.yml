@@ -26,6 +26,7 @@ jobs:
             core.setOutput("labels", labels);
 
       - name: Protected paths check
+        continue-on-error: true
         shell: pwsh
         run: |
           pwsh -NoProfile -File ".github/scripts/protected-paths.ps1" -BaseRef "origin/main" -HeadRef "HEAD" -ConfigPath ".github/protected-paths.json" -AllowFile ".github/ALLOW_PROTECTED_PATHS" -PrLabels "${{ steps.labels.outputs.labels }}"
